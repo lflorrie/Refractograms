@@ -3,6 +3,11 @@
 
 #include <vector>
 
+#include <gsl/gsl_integration.h>
+
+#include <boost/math/quadrature/gauss_kronrod.hpp>
+
+
 template <typename T>
 double FindRoot(T f, double a, double b, double eps = 0.0000001){
     double c = 0;

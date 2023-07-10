@@ -5,6 +5,8 @@
 #include "math_utils.h"
 #include <chrono>
 #include <thread>
+
+
 class RefrLogic1
 {
 public:
@@ -51,14 +53,27 @@ public:
         return (n0 * func_x0(fi, d)) /
                (r * qSqrt(qPow(func_n(r), 2) * qPow(r, 2) - qPow(n0, 2) * qPow(func_x0(fi, d), 2)));
     }
+
+    inline double func_integr_new(double r) {
+        double n0 = func_n(0);
+        return (n0 * func_x0(fi, d)) /
+               (r * qSqrt(qPow(func_n(r), 2) * qPow(r, 2) - qPow(n0, 2) * qPow(func_x0(fi, d), 2)));
+    }
+
     inline double func_alphan(double fi, double d) {
+        this->fi = fi;
+        this->d = d;
         auto integr = [&](double r){ return func_integr(r, fi, d); };
-        return func_alpha0(fi, d) + simpsonIntegral(integr, func_r0(fi, d), func_rn(fi, d), N_INTEGRAL); // TODO
+        return func_alpha0(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr, func_r0(fi, d), func_rn(fi, d));
     }
+
     inline double func_alpha1(double r1, double fi, double d) {
+        this->fi = fi;
+        this->d = d;
         auto integr = [&](double r){ return func_integr(r, fi, d); };
-        return func_alpha0(fi, d) + simpsonIntegral(integr, func_r0(fi, d), r1, N_INTEGRAL); // TODO
+        return func_alpha0(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr, func_r0(fi, d), r1);
     }
+
     inline double func_x1(double r1, double fi, double d) {
         return r1 * qSin(func_alpha1(r1, fi, d));
     }
@@ -68,7 +83,7 @@ public:
 
     inline double func_alpha2(double r2, double fi, double d) {
         auto integr = [&](double r){ return func_integr(r, fi, d); };
-        return func_alphan(fi, d) + simpsonIntegral(integr,  r2, func_rn(fi, d), N_INTEGRAL); // TODO
+        return func_alphan(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr,  r2, func_rn(fi, d));
     }
 
     inline double func_x2(double r2, double fi, double d) {
@@ -114,6 +129,8 @@ private:
     double a; // характерная толщина слоя
     int z0; // координата входа лазерного пучка в неоднородность
 
+    double fi;
+    double d;
 
     int N_INTEGRAL = 1000;
     /* 1 000 000
