@@ -95,7 +95,11 @@ public:
 
     inline double func_r(double fi, double d, double z) {
         auto func_tmp = [&](double r) { return func_z2(r, fi, d) - z; };
-        return FindRoot(func_tmp, z * 2, z * 3); // z * 3
+        boost::math::tools::eps_tolerance<double> tol(std::numeric_limits<double>::digits - 3);
+        boost::uintmax_t it = 20;
+        auto res = boost::math::tools::toms748_solve(func_tmp, z * 2, z * 3, [](double a, double b) { return (b - a) < 0.001; }, it);
+//        auto res = boost::math::tools::bracket_and_solve_root(func_tmp, z * 3, 2.0, true, [](double a, double b) { return std::abs(a - b) < 0.01; }, it);
+        return res.first;
     }
 
     inline double func_x(double fi, double d, double z) {

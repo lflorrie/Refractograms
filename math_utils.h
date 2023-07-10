@@ -6,7 +6,7 @@
 #include <gsl/gsl_integration.h>
 
 #include <boost/math/quadrature/gauss_kronrod.hpp>
-
+#include <boost/math/tools/roots.hpp>
 
 template <typename T>
 double FindRoot(T f, double a, double b, double eps = 0.0000001){
