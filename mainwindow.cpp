@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    RefrLogic1 refr1;
+
     qDebug() << "OK";
 
 
@@ -30,12 +30,84 @@ MainWindow::MainWindow(QWidget *parent)
 //        return -1;
     }
     ui->tabWidget->addTab(scatter.scatterWidget(), "Scatter Graph");
+
+
     // Add surface widget
 //     ui->tabWidget->addTab(surface.surfaceWidget(), "Surface Graph");
+
+
+    plot2DPlotRefr1();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::plot2DPlotRefr1() {
+    // TAB 1
+    auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 2, 100);
+//    auto dataPlot1 = refr1.makePlotFuncT(refr1.getR(), refr1.getR() + 2, 100);
+
+    QSplineSeries *series = new QSplineSeries;
+    series->setName("func t");
+    for (auto i : dataPlot1) {
+        series->append(i);
+    }
+    QChart *chart = new QChart();
+    chart->addSeries(series);
+    chart->createDefaultAxes();
+
+    QChartView *chartView = new QChartView(chart);
+    chartView->setRenderHint(QPainter::Antialiasing);
+    chart->legend()->setAlignment(Qt::AlignBottom);
+//    ui->tabWidget->addTab(chartView, "2d plot t");
+
+
+//    auto dataPlot2 = refr1.makePlotFuncN(refr1.getR(), refr1.getR() + 2, 100);
+    auto dataPlot2 = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , refr1.getR(), refr1.getR() + 2, 100);
+    QSplineSeries *series2 = new QSplineSeries;
+    series2->setName("func n");
+    for (auto i : dataPlot2) {
+        series2->append(i);
+    }
+    QChart *chart2 = new QChart();
+    chart2->legend()->setAlignment(Qt::AlignBottom);
+    chart2->addSeries(series2);
+    chart2->createDefaultAxes();
+
+    QChartView *chartView2 = new QChartView(chart2);
+
+    chartView2->setRenderHint(QPainter::Antialiasing);
+//    ui->tabWidget->addTab(chartView2, "2d plot n");
+
+
+    auto layoutTab1 = ui->tab->layout();
+    layoutTab1->addWidget(chartView);
+    layoutTab1->addWidget(chartView2);
+
+    // TAB 2
+
+
+    auto dataPlot3 = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , refr1.getR(), refr1.getR() + 2, 100);
+
+    QSplineSeries *series3 = new QSplineSeries;
+    series3->setName("func n");
+    for (auto i : dataPlot3) {
+        series3->append(i);
+    }
+    QChart *chart3 = new QChart();
+    chart3->legend()->setAlignment(Qt::AlignBottom);
+    chart3->addSeries(series3);
+    chart3->createDefaultAxes();
+
+    QChartView *chartView3 = new QChartView(chart3);
+
+    chartView3->setRenderHint(QPainter::Antialiasing);
+
+    auto layoutTab2 = ui->tab_2->layout();
+
+    layoutTab2->addWidget(chartView3);
+
 }
 
