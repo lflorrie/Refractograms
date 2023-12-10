@@ -55,6 +55,7 @@ void MainWindow::plot2DPlotRefr1() {
         series->append(i);
     }
     QChart *chart = new QChart();
+    this->chart1 = chart;
     chart->addSeries(series);
     chart->createDefaultAxes();
 
@@ -109,5 +110,36 @@ void MainWindow::plot2DPlotRefr1() {
 
     layoutTab2->addWidget(chartView3);
 
+}
+
+
+void MainWindow::on_pushButton_clicked()
+{
+    refr1.set_values(get_value_from_input());
+//    plot2DPlotRefr1();
+    auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 2, 100);
+    //    auto dataPlot1 = refr1.makePlotFuncT(refr1.getR(), refr1.getR() + 2, 100);
+
+    QSplineSeries *series = new QSplineSeries;
+    series->setName("func t");
+    for (auto i : dataPlot1) {
+        series->append(i);
+    }
+    this->chart1->removeAllSeries();
+    this->chart1->addSeries(series);
+}
+
+RefrLogicData MainWindow::get_value_from_input()
+{
+    RefrLogicData data;
+    data.R = ui->lineEdit->text().toDouble();
+    data.a = ui->lineEdit_2->text().toDouble();
+    data.z0 = ui->lineEdit_3->text().toDouble();
+    data.deltaR = ui->lineEdit_4->text().toDouble();
+    data.z1 = ui->lineEdit_5->text().toDouble();
+    data.T0 = ui->lineEdit_6->text().toDouble();
+    data.deltaT = ui->lineEdit_7->text().toDouble();
+    data.x0 = ui->lineEdit_8->text().toDouble();
+    return data;
 }
 

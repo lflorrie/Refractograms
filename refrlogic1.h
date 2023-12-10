@@ -6,14 +6,32 @@
 #include <chrono>
 #include <thread>
 #include <QPointF>
+
+struct RefrLogicData
+{
+    double R; // радиус шара
+    double a; // характерная толщина слоя
+    double z0; // координата входа лазерного пучка в неоднородность
+    double deltaR;
+    double z1;
+    double T0;
+    double deltaT;
+    double x0;
+};
+
 class RefrLogic1
 {
 public:
     RefrLogic1();
     void initTestData() {
-        R = 50.5 / 2;
-        a = 1.01;
-        z0 = 300;
+        data.R = 18;
+        data.a = 3.680;
+        data.z0 = 300;
+        data.deltaR = -1.669;
+        data.z1 = 440;
+        data.T0 = 180;
+        data.deltaT = -150;
+        data.x0 = 20;
     }
     void testFunc() {
         qDebug() << "TEST!";
@@ -26,7 +44,7 @@ public:
         qDebug() << "3.141559320256472 -" << func_alpha0(0, 0.01);
         qDebug() << "1.570795939558606 -" << func_alphan(0, 0.01);
 
-        qDebug() << "300.16996851783824 -" << func_r0(M_PI / 3, 5 * a);
+        qDebug() << "300.16996851783824 -" << func_r0(M_PI / 3, 5 * data.a);
         qDebug() << "3.0915717967840233 -" << func_alpha1(40, 0, 2);
         qDebug() << "0.049864396535265865 -" << func_alpha2(40, 0, 2);
         qDebug() << "2.10362812 -" << func_r(1, 1, 1);
@@ -39,7 +57,7 @@ public:
 
     // в следующей формуле численно задаются параметры зависимости температуры в слое от радиуса.
     inline double func_t(double r) const{
-        return 20.0 + 100.0 * qExp((-qPow(r - R + 0.6, 2)) / (qPow(a, 2)));
+        return data.T0 + data.deltaT * qExp((-qPow(r - data.R - data.deltaR, 2)) / (qPow(data.a, 2)));
     }
     // при заданной температурной зависимости находим зависимость показателя преломления
     inline double func_n(double r) const {
@@ -56,16 +74,16 @@ public:
 
     inline double func_rn(double fi, double d) {
         auto tempFunc = [&](double r){ return func_tmp(r, fi, d); };
-        return FindRoot(tempFunc, 0, 6 * R); // TODO: replace to boost func
+        return FindRoot(tempFunc, 0, 6 * data.R); // TODO: replace to boost func
     }
 
     //
 
     inline double func_r0(double fi, double d) {
-        return qSqrt(qPow(func_x0(fi, d), 2) + qPow(z0, 2));
+        return qSqrt(qPow(func_x0(fi, d), 2) + qPow(data.z0, 2));
     }
     inline double func_alpha0(double fi, double d) {
-        return M_PI_2 + qAtan(z0 / func_x0(fi, d));
+        return M_PI_2 + qAtan(data.z0 / func_x0(fi, d));
     }
 
     inline double func_integr(double r, double fi, double d) {
@@ -132,7 +150,7 @@ public:
         auto func_tmp = [&](double r) { return func_z2(r, fi, d) - z; };
 //        boost::math::tools::eps_tolerance<double> tol(std::numeric_limits<double>::digits - 3);
 //        boost::uintmax_t it = 20;
-//        auto res = boost::math::tools::toms748_solve(func_tmp, 0.0, R * 8, [](double a, double b) { return (b - a) < 0.001; }, it);
+//        auto res = boost::math::tools::toms748_solve(func_tmp, 0.0, data.R * 8, [](double a, double b) { return (b - a) < 0.001; }, it);
 //        try {
 //            auto res = boost::math::tools::bracket_and_solve_root(func_tmp, z * 3, 2.0, true, [](double a, double b) { return std::abs(b - a) < 0.01; }, it);
 //            qDebug () << "RES.FIRST" << res.first;
@@ -201,15 +219,15 @@ public:
         double fi_min = -M_PI_4;
         double fi_max = M_PI_4;
         double fi_step = (fi_max - fi_min) / 100;
-        double d = 25.5;
-        double z = 40;
+//        double d = 25.5;
 
 
         double fi = fi_min;
+        // TODO: Make loop
 //        for (int i = 0; i < 100; ++i) {
             QPointF point;
-            point.setX(func_x(fi, d, z));
-            point.setY(func_y(fi, d, z));
+            point.setX(func_x(fi, data.x0, data.z1)); // TODO: x0 + 2j
+            point.setY(func_y(fi, data.x0, data.z1));
             points.push_back(point);
             fi += fi_step;
 //        }
@@ -221,17 +239,18 @@ public:
 
     }
     double getR() const{
-        return R;
+        return data.R;
+    }
+
+    void set_values(const RefrLogicData &new_data)
+    {
+        data = new_data;
     }
 private:
-    double R; // радиус шара
-    double a; // характерная толщина слоя
-    int z0; // координата входа лазерного пучка в неоднородность
-
+    RefrLogicData data;
+    int N_INTEGRAL = 1000;
     double fi;
     double d;
-
-    int N_INTEGRAL = 1000;
     /* 1 000 000
         1.33134 - 1.33134
         22.00016106 - 22.0002

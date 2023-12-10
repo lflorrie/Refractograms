@@ -12,6 +12,11 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+//struct RefrCharts1 {
+//    QChart chart;
+
+//};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -22,8 +27,13 @@ public:
     void plot2DPlotRefr1();
 
     int a;
+private slots:
+    void on_pushButton_clicked();
+private:
+    RefrLogicData get_value_from_input();
 private:
     RefrLogic1 refr1;
+    QChart *chart1;
     Ui::MainWindow *ui;
 };
 
