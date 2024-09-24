@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 #include "refrlogic1.h"
 #include <QtDebug>
-#include "chartview.h"
 #include "scattergraph.h"
 #include "surfacegraph.h"
 #include <QMessageBox>
@@ -140,8 +139,8 @@ void MainWindow::plot2Dfunc_t(QChartView *chartView, QChart *chart)
 	chart->setTitle("Распределение температуры");
 
 	// Grid settings
-	QValueAxis *axisX = static_cast<QValueAxis *>(*chart->axes().begin());
-	QValueAxis *axisY = static_cast<QValueAxis *>(*chart->axes(Qt::Vertical).begin());
+	QValueAxis *axisX = static_cast<QValueAxis *>(chart->axes().at(0));
+	QValueAxis *axisY = static_cast<QValueAxis *>(chart->axes(Qt::Vertical).at(0));
 	axisX->setTickType(QValueAxis::TicksDynamic);
 	axisX->setTickInterval(0.5);
 
@@ -178,8 +177,8 @@ void MainWindow::plot2Dfunc_n(QChartView *chartView, QChart *chart)
 	chart->setTitleFont(m_font);
 
 	// Grid settings
-	QValueAxis *axisX = static_cast<QValueAxis *>(*chart->axes().begin());
-	QValueAxis *axisY = static_cast<QValueAxis *>(*chart->axes(Qt::Vertical).begin());
+	QValueAxis *axisX = static_cast<QValueAxis *>(chart->axes().at(0));
+	QValueAxis *axisY = static_cast<QValueAxis *>(chart->axes(Qt::Vertical).at(0));
 	axisX->setTickType(QValueAxis::TicksDynamic);
 	axisX->setTickInterval(0.5);
 

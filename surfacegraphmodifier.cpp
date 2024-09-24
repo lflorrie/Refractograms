@@ -23,7 +23,7 @@ const float sampleMax = 8.f;
 const float areaWidth = 8000.f;
 const float areaHeight = 8000.f;
 const float aspectRatio = 0.1389f;
-const float minRange = areaWidth * 0.49f;
+// const float minRange = areaWidth * 0.49f;
 
 SurfaceGraphModifier::SurfaceGraphModifier(Q3DSurface *surface, QLabel *label, QObject *parent) :
       QObject(parent),
@@ -578,6 +578,7 @@ void SurfaceGraphModifier::toggleShadows(bool shadows)
 //! [15]
 void SurfaceGraphModifier::toggleSurfaceTexture(bool enable)
 {
+	(void)enable;
 //    if (enable)
 //        m_topography->setTextureFile(":/data/maptexture.jpg");
 //    else
