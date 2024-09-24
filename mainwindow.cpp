@@ -6,6 +6,8 @@
 #include "scattergraph.h"
 #include "surfacegraph.h"
 #include <QMessageBox>
+#include <QValueAxis>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -37,13 +39,15 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     plot2DPlotRefr1();
+	qInfo() << "Main window created";
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+	qInfo() << "Main window deleted";
 }
-#include <QValueAxis>
+
 void MainWindow::plot2DPlotRefr1() {
     // TAB 1
     auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 2, 100);
