@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include "refrlogic1.h"
 #include <QtDebug>
-
+#include "chartview.h"
 #include "scattergraph.h"
 #include "surfacegraph.h"
 #include <QMessageBox>
@@ -43,7 +43,7 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-
+#include <QValueAxis>
 void MainWindow::plot2DPlotRefr1() {
     // TAB 1
     auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 2, 100);
@@ -59,20 +59,31 @@ void MainWindow::plot2DPlotRefr1() {
     chart->addSeries(series);
     chart->createDefaultAxes();
 
-    QChartView *chartView = new QChartView(chart);
-    chartView->setRenderHint(QPainter::Antialiasing);
-    chart->legend()->setAlignment(Qt::AlignBottom);
+	ChartView *chartView = new ChartView(chart);
+	chart->setTitle("Распределение температуры");
+	// Grid settings
+	QValueAxis *axisX = static_cast<QValueAxis *>(*chart->axes().begin());
+	QValueAxis *axisY = static_cast<QValueAxis *>(*chart->axes(Qt::Vertical).begin());
+	axisX->setTickType(QValueAxis::TicksDynamic);
+	axisX->setTickInterval(0.5);
+
+
+	// chart->addAxis(axisY, Qt::AlignLeft);
+	chartView->setRenderHint(QPainter::Antialiasing);
+	chart->legend()->setAlignment(Qt::AlignBottom);
+
 //    ui->tabWidget->addTab(chartView, "2d plot t");
 
 
 //    auto dataPlot2 = refr1.makePlotFuncN(refr1.getR(), refr1.getR() + 2, 100);
-    auto dataPlot2 = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , refr1.getR(), refr1.getR() + 2, 100);
-    QSplineSeries *series2 = new QSplineSeries;
-    series2->setName("func n");
-    for (auto i : dataPlot2) {
+	auto dataPlot2 = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , refr1.getR(), refr1.getR() + 2, 100);
+	QSplineSeries *series2 = new QSplineSeries;
+	series2->setName("func n");
+	for (auto i : dataPlot2) {
         series2->append(i);
     }
     QChart *chart2 = new QChart();
+	chart2->setTitle("Распределение показателя преломления");
     chart2->legend()->setAlignment(Qt::AlignBottom);
     chart2->addSeries(series2);
     chart2->createDefaultAxes();
@@ -110,11 +121,22 @@ void MainWindow::plot2DPlotRefr1() {
 
     layoutTab2->addWidget(chartView3);
 
+	QFont font;
+	font.setBold(1);
+	font.setPixelSize(20);
+	chart2->setTitleFont(font);
+	chart->setTitleFont(font);
+
+	axisX->setLabelsEditable(1);
+	axisX->setLabelsVisible(1);
+	axisX->setTitleText("x, мм");
+	axisY->setTitleText("t, °С");
 }
 
 
 void MainWindow::on_pushButton_clicked()
 {
+	qDebug() << "Update fields\n";
     refr1.set_values(get_value_from_input());
 //    plot2DPlotRefr1();
     auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 2, 100);
