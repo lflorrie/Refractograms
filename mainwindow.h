@@ -26,14 +26,19 @@ public:
 
     void plot2DPlotRefr1();
 
-    int a;
 private slots:
     void on_pushButton_clicked();
 private:
+	void plot2Dfunc_t(QChartView *chartView, QChart *chart);
+	void plot2Dfunc_n(QChartView *chartView, QChart *chart);
     RefrLogicData get_value_from_input();
 private:
+	// Plot for func_t
     RefrLogic1 refr1;
     QChart *chart1;
+	QChart *chart2;
+
+	QFont m_font;
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

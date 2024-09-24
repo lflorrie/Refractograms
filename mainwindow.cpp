@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+	m_font.setBold(1);
+	m_font.setPixelSize(20);
 
     qDebug() << "OK";
 
@@ -50,55 +52,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::plot2DPlotRefr1() {
     // TAB 1
-    auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 2, 100);
-//    auto dataPlot1 = refr1.makePlotFuncT(refr1.getR(), refr1.getR() + 2, 100);
+	chart1 = new QChart;
+	chart2 = new QChart;
 
-    QSplineSeries *series = new QSplineSeries;
-    series->setName("func t");
-    for (auto i : dataPlot1) {
-        series->append(i);
-    }
-    QChart *chart = new QChart();
-    this->chart1 = chart;
-    chart->addSeries(series);
-    chart->createDefaultAxes();
+	QChartView *chartView = new QChartView(chart1);
+	QChartView *chartView2 = new QChartView(chart2);
 
-	ChartView *chartView = new ChartView(chart);
-	chart->setTitle("Распределение температуры");
-	// Grid settings
-	QValueAxis *axisX = static_cast<QValueAxis *>(*chart->axes().begin());
-	QValueAxis *axisY = static_cast<QValueAxis *>(*chart->axes(Qt::Vertical).begin());
-	axisX->setTickType(QValueAxis::TicksDynamic);
-	axisX->setTickInterval(0.5);
+	plot2Dfunc_t(chartView, chart1);
+	plot2Dfunc_n(chartView2, chart2);
 
+	auto layoutTab1 = ui->tab->layout();
 
-	// chart->addAxis(axisY, Qt::AlignLeft);
-	chartView->setRenderHint(QPainter::Antialiasing);
-	chart->legend()->setAlignment(Qt::AlignBottom);
-
-//    ui->tabWidget->addTab(chartView, "2d plot t");
-
-
-//    auto dataPlot2 = refr1.makePlotFuncN(refr1.getR(), refr1.getR() + 2, 100);
-	auto dataPlot2 = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , refr1.getR(), refr1.getR() + 2, 100);
-	QSplineSeries *series2 = new QSplineSeries;
-	series2->setName("func n");
-	for (auto i : dataPlot2) {
-        series2->append(i);
-    }
-    QChart *chart2 = new QChart();
-	chart2->setTitle("Распределение показателя преломления");
-    chart2->legend()->setAlignment(Qt::AlignBottom);
-    chart2->addSeries(series2);
-    chart2->createDefaultAxes();
-
-    QChartView *chartView2 = new QChartView(chart2);
-
-    chartView2->setRenderHint(QPainter::Antialiasing);
-//    ui->tabWidget->addTab(chartView2, "2d plot n");
-
-
-    auto layoutTab1 = ui->tab->layout();
     layoutTab1->addWidget(chartView);
     layoutTab1->addWidget(chartView2);
 
@@ -124,12 +88,69 @@ void MainWindow::plot2DPlotRefr1() {
     auto layoutTab2 = ui->tab_2->layout();
 
     layoutTab2->addWidget(chartView3);
+}
 
-	QFont font;
-	font.setBold(1);
-	font.setPixelSize(20);
-	chart2->setTitleFont(font);
-	chart->setTitleFont(font);
+
+void MainWindow::on_pushButton_clicked()
+{
+	qInfo() << "Button clicked. Updating fields for func_t and func_n.";
+    refr1.set_values(get_value_from_input());
+//    plot2DPlotRefr1();
+    auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 2, 100);
+    //    auto dataPlot1 = refr1.makePlotFuncT(refr1.getR(), refr1.getR() + 2, 100);
+	auto dataPlot2 = refr1.make2DPlot([&](double x) { return refr1.func_n(x);}, refr1.getR(), refr1.getR() + 2, 100);
+
+	{
+		QSplineSeries *series = new QSplineSeries;
+		series->setName("func t");
+		for (auto i : dataPlot1) {
+			series->append(i);
+		}
+		this->chart1->removeAllSeries();
+		this->chart1->addSeries(series);
+	}
+
+	{
+		QSplineSeries *series = new QSplineSeries;
+		series->setName("func n");
+		for (auto i : dataPlot1) {
+			series->append(i);
+		}
+		this->chart2->removeAllSeries();
+		this->chart2->addSeries(series);
+	}
+}
+
+void MainWindow::plot2Dfunc_t(QChartView *chartView, QChart *chart)
+{
+	if (!chartView || !chart)
+		return;
+
+	auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 2, 100);
+	//    auto dataPlot1 = refr1.makePlotFuncT(refr1.getR(), refr1.getR() + 2, 100);
+
+	QSplineSeries *series = new QSplineSeries;
+	series->setName("func t");
+	for (auto i : dataPlot1) {
+		series->append(i);
+	}
+
+	chart->addSeries(series);
+	chart->createDefaultAxes();
+	chart->setTitle("Распределение температуры");
+
+	// Grid settings
+	QValueAxis *axisX = static_cast<QValueAxis *>(*chart->axes().begin());
+	QValueAxis *axisY = static_cast<QValueAxis *>(*chart->axes(Qt::Vertical).begin());
+	axisX->setTickType(QValueAxis::TicksDynamic);
+	axisX->setTickInterval(0.5);
+
+
+	// chart->addAxis(axisY, Qt::AlignLeft);
+	chartView->setRenderHint(QPainter::Antialiasing);
+	chart->legend()->setAlignment(Qt::AlignBottom);
+
+	chart->setTitleFont(m_font);
 
 	axisX->setLabelsEditable(1);
 	axisX->setLabelsVisible(1);
@@ -137,22 +158,36 @@ void MainWindow::plot2DPlotRefr1() {
 	axisY->setTitleText("t, °С");
 }
 
-
-void MainWindow::on_pushButton_clicked()
+void MainWindow::plot2Dfunc_n(QChartView *chartView, QChart *chart)
 {
-	qDebug() << "Update fields\n";
-    refr1.set_values(get_value_from_input());
-//    plot2DPlotRefr1();
-    auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 2, 100);
-    //    auto dataPlot1 = refr1.makePlotFuncT(refr1.getR(), refr1.getR() + 2, 100);
+	if (!chartView || !chart)
+		return;
+	auto dataPlot2 = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , refr1.getR(), refr1.getR() + 2, 100);
+	QSplineSeries *series2 = new QSplineSeries;
+	series2->setName("func n");
+	for (auto i : dataPlot2) {
+		series2->append(i);
+	}
+	chart->setTitle("Распределение показателя преломления");
+	chart->legend()->setAlignment(Qt::AlignBottom);
+	chart->addSeries(series2);
+	chart->createDefaultAxes();
 
-    QSplineSeries *series = new QSplineSeries;
-    series->setName("func t");
-    for (auto i : dataPlot1) {
-        series->append(i);
-    }
-    this->chart1->removeAllSeries();
-    this->chart1->addSeries(series);
+	chartView->setRenderHint(QPainter::Antialiasing);
+
+	chart->setTitleFont(m_font);
+
+	// Grid settings
+	QValueAxis *axisX = static_cast<QValueAxis *>(*chart->axes().begin());
+	QValueAxis *axisY = static_cast<QValueAxis *>(*chart->axes(Qt::Vertical).begin());
+	axisX->setTickType(QValueAxis::TicksDynamic);
+	axisX->setTickInterval(0.5);
+
+	axisX->setLabelsEditable(1);
+	axisX->setLabelsVisible(1);
+	qWarning() << "Wrong title for axis.";
+	axisX->setTitleText("x, мм");
+	axisY->setTitleText("t, °С");
 }
 
 RefrLogicData MainWindow::get_value_from_input()

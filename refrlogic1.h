@@ -170,29 +170,29 @@ public:
         return func_r(fi, d, z) * qSin(func_alpha2(func_r(fi, d, z), fi, d)) * qSin(fi);
     }
 
-    std::vector<QPointF> makePlotFuncT(double from, double to, int steps) {
-        std::vector<QPointF> res;
-        double curVal = from;
-        double step = (to - from) / steps;
+	// std::vector<QPointF> makePlotFuncT(double from, double to, int steps) {
+	//     std::vector<QPointF> res;
+	//     double curVal = from;
+	//     double step = (to - from) / steps;
 
-        for (int i = 0; i <= steps; ++i) {
-            res.push_back(QPointF(curVal, func_t(curVal)));
-            curVal += step;
-        }
-        return res;
-    }
+	//     for (int i = 0; i <= steps; ++i) {
+	//         res.push_back(QPointF(curVal, func_t(curVal)));
+	//         curVal += step;
+	//     }
+	//     return res;
+	// }
 
-    std::vector<QPointF> makePlotFuncN(double from, double to, int steps) {
-        std::vector<QPointF> res;
-        double curVal = from;
-        double step = (to - from) / steps;
+	// std::vector<QPointF> makePlotFuncN(double from, double to, int steps) {
+	//     std::vector<QPointF> res;
+	//     double curVal = from;
+	//     double step = (to - from) / steps;
 
-        for (int i = 0; i <= steps; ++i) {
-            res.push_back(QPointF(curVal, func_n(curVal)));
-            curVal += step;
-        }
-        return res;
-    }
+	//     for (int i = 0; i <= steps; ++i) {
+	//         res.push_back(QPointF(curVal, func_n(curVal)));
+	//         curVal += step;
+	//     }
+	//     return res;
+	// }
 //    template<typename T>
     std::vector<QPointF> make2DPlot(std::function<double(double)> func, double from, double to, int steps) {
         std::vector<QPointF> res;
