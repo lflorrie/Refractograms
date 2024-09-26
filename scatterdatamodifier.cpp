@@ -56,7 +56,7 @@ ScatterDataModifier::ScatterDataModifier(Q3DScatter *scatter, QObject *parent) :
     //! [9]
 
     //! [2]
-    addData();
+	// addData();
     //! [2]
 }
 

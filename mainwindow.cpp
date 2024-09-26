@@ -91,7 +91,7 @@ void MainWindow::plot2DPlotRefr1() {
 	{
 		z_array.push_back(25 + i * 25);
 	}
-	plot2Dfunc_refr(chartView3_2, chart3_2, z_array);
+	auto data_ = plot2Dfunc_refr(chartView3_2, chart3_2, z_array);
 
 	auto layoutTab3 = ui->tab_3->layout();
 
@@ -99,14 +99,46 @@ void MainWindow::plot2DPlotRefr1() {
 	layoutTab3->addWidget(chartView3_2);
 
 	// TAB 4
-/*
-* for i in range(0, 10):
-	for j in range(0, 100):
-		z[i * 100 + j] = 20.0 + i * (440.0 - 20.0) / 10.0;
-*/
+	QScatterDataArray *dataArray = new QScatterDataArray;
+	dataArray->reserve(1000);
 
+	Q3DScatter *scatter3d = new Q3DScatter;
+	for (int i = 0; i < 9; ++i)
+	{
+		for (int j = 0; j < 100; ++j)
+		{
+			if (data_[j + i * 100].x() != data_[j + i * 100].x() ||
+				data_[j + i * 100].y() != data_[j + i * 100].y())
+				continue;
+			dataArray->append(QScatterDataItem({(float)(25 + i * 25) , (float)data_[j + i * 100].y(), -(float)data_[j + i * 100].x()}));
 
+		}
+		qDebug() << i;
+	}
+	qDebug() << "Show Scatter:";
+	QScatter3DSeries *series = new QScatter3DSeries;
+	series->dataProxy()->addItems(*dataArray);
 
+	// ax_->setAutoAdjustRange(1);
+	// scatter3d->setAxisZ(ax_);
+	scatter3d->setAspectRatio(1.0);
+
+	series->setItemSize(0.1);
+	auto grad = QLinearGradient();
+	grad.setColorAt(0, Qt::red);
+	grad.setColorAt(1, Qt::blue);
+
+	series->setBaseGradient(grad);
+	series->setColorStyle(Q3DTheme::ColorStyleRangeGradient);
+	// series->setBaseGradient()
+	// series->setBaseColor(QColor::fromRgb(0, 0, 200));
+	QWidget *container = QWidget::createWindowContainer(scatter3d);
+	scatter3d->setHorizontalAspectRatio(1.0);
+	// scatter3d->seriesList().at(0)->dataProxy()->resetArray(dataArray);
+	series->setMeshSmooth(1);
+	scatter3d->addSeries(series);
+	auto layout4 = ui->tab_4->layout();
+	layout4->addWidget(container);
 	qInfo() << "plot2DPlotRefr1 end";
 }
 

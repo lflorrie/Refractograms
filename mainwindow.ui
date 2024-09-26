@@ -38,6 +38,12 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2"/>
       </widget>
+      <widget class="QWidget" name="tab_4">
+       <attribute name="title">
+        <string>Tab 4</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_3"/>
+      </widget>
      </widget>
     </item>
     <item row="0" column="0">
