@@ -32,7 +32,7 @@ TRANSLATIONS += \
     Refractograms_ru_RU.ts
 CONFIG += lrelease
 CONFIG += embed_translations
-
+INCLUDEPATH += include
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
