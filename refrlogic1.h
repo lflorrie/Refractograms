@@ -104,7 +104,7 @@ public:
         auto integr = [&](double r){ return func_integr(r, fi, d); };
         try  {
 		// return func_alpha0(fi, d) + simpsonIntegral<decltype(integr)>(integr, func_r0(fi, d), func_rn(fi, d), N_INTEGRAL);
-		return func_alpha0(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr, func_r0(fi, d), func_rn(fi, d), 15, 1e-9);
+		return func_alpha0(fi, d) + boost::math::quadrature::gauss_kronrod<double, 15>::integrate(integr, func_r0(fi, d), func_rn(fi, d), 15, 1e-9);
         } catch (std::exception &ex){
             qDebug() << "ALPHA N";
             exit(1);
@@ -117,7 +117,7 @@ public:
         auto integr = [&](double r){ return func_integr(r, fi, d); };
         try {
 		// return func_alpha0(fi, d) + simpsonIntegral<decltype(integr)>(integr, func_r0(fi, d), r1, N_INTEGRAL);
-		return func_alpha0(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr, func_r0(fi, d), r1, 15, 1e-9);
+		return func_alpha0(fi, d) + boost::math::quadrature::gauss_kronrod<double, 15>::integrate(integr, func_r0(fi, d), r1, 15, 1e-9);
         } catch (std::exception &ex){
             qDebug() << "ALPHA 1";
             exit(1);
@@ -135,7 +135,7 @@ public:
         auto integr = [&](double r){ return func_integr(r, fi, d); };
         try {
 			// return func_alphan(fi, d) + simpsonIntegral<decltype(integr)>(integr, r2, func_rn(fi, d), N_INTEGRAL);
-			return func_alphan(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr,  r2, func_rn(fi, d), 15, 1e-9);
+			return func_alphan(fi, d) + boost::math::quadrature::gauss_kronrod<double, 15>::integrate(integr,  r2, func_rn(fi, d), 15, 1e-9);
         } catch (std::exception &ex){
             qDebug() << "ALPHA 2" << r2 << func_rn(fi, d);
             exit(2);
@@ -168,7 +168,7 @@ public:
 		return FindRoot(func_tmp, z, z * 3);
     }
 
-    inline double func_x(double fi, double d, double z) {
+	inline double func_x(double fi, double d, double z) {
         return func_r(fi, d, z) * qSin(func_alpha2(func_r(fi, d, z), fi, d)) * qCos(fi);
     }
     inline double func_y(double fi, double d, double z) {

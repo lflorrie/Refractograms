@@ -54,7 +54,7 @@ void MainWindow::plot2DPlotRefr1() {
 	qInfo() << "TAB1";
 	chart1 = new QChart;
 	QChartView *chartView = new QChartView(chart1);
-	chartView->setRubberBand(QChartView::HorizontalRubberBand);
+	chartView->setRubberBand(QChartView::RectangleRubberBand);
 	plot2Dfunc_t(chartView, chart1);
 	auto layoutTab1 = ui->tab->layout();
 	layoutTab1->addWidget(chartView);
@@ -63,7 +63,7 @@ void MainWindow::plot2DPlotRefr1() {
 	qInfo() << "TAB2";
 	chart2 = new QChart;
 	QChartView *chartView2 = new QChartView(chart2);
-	chartView2->setRubberBand(QChartView::HorizontalRubberBand);
+	chartView2->setRubberBand(QChartView::RectangleRubberBand);
 
 	plot2Dfunc_n(chartView2, chart2);
 	auto layoutTab2 = ui->tab_2->layout();
@@ -80,14 +80,16 @@ void MainWindow::plot2DPlotRefr1() {
 
 	QChartView *chartView3 = new QChartView(chart3);
 	QChartView *chartView3_2 = new QChartView(chart3_2);
-	chartView3->setRubberBand(QChartView::HorizontalRubberBand);
+	chartView3->setRubberBand(QChartView::RectangleRubberBand);
+	chartView3_2->setRubberBand(QChartView::RectangleRubberBand);
 
-	plot2Dfunc_refr(chartView3, chart3, {440});
+	plot2Dfunc_refr(chartView3, chart3, {25});
 	qInfo() << "TAB3_2";
 	std::vector<double> z_array;
-	for (int i = 0; i < 10; ++i)
+	double n = 9;
+	for (int i = 0; i < (int)n; ++i)
 	{
-		z_array.push_back((440 - 20) / 2.0 * i + 20);
+		z_array.push_back(25 + i * 25);
 	}
 	plot2Dfunc_refr(chartView3_2, chart3_2, z_array);
 
@@ -96,6 +98,12 @@ void MainWindow::plot2DPlotRefr1() {
 	layoutTab3->addWidget(chartView3);
 	layoutTab3->addWidget(chartView3_2);
 
+	// TAB 4
+/*
+* for i in range(0, 10):
+	for j in range(0, 100):
+		z[i * 100 + j] = 20.0 + i * (440.0 - 20.0) / 10.0;
+*/
 
 
 
@@ -246,15 +254,16 @@ void async_calculate()
 {
 
 }
-void MainWindow::plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std::vector<double> &z_array)
+std::vector<QPointF> MainWindow::plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std::vector<double> &z_array)
 {
 	double fi_min = -M_PI_4;
 	double fi_max = M_PI_4;
 	int n = 100;
 	std::vector<QPointF> dataPlot3(n * z_array.size(), {0.f, 0.f});
 	double fi_step = (fi_max - fi_min) / n;
-	std::vector<thread_> threads(std::thread::hardware_concurrency());
-	qInfo() << "Count of threads: " << std::thread::hardware_concurrency();
+	int threads_count = std::thread::hardware_concurrency();
+	std::vector<thread_> threads(threads_count);
+	qInfo() << "Count of threads: " << threads_count;
 	// QPointF point;
 	for (size_t zi = 0; zi < z_array.size(); ++zi)
 	{
@@ -265,7 +274,7 @@ void MainWindow::plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std
 			size_t t_index = 0;
 			while (1)
 			{
-				if (t_index == std::thread::hardware_concurrency())
+				if (t_index == threads_count)
 					t_index = 0;
 				if (threads[t_index].l.try_lock())
 				{
@@ -289,7 +298,7 @@ void MainWindow::plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std
 			fi += fi_step;
 		}
 	}
-	for (int i = 0; i < std::thread::hardware_concurrency(); ++i)
+	for (int i = 0; i < threads_count; ++i)
 	{
 		if (threads[i].t.joinable())
 		{
@@ -297,14 +306,27 @@ void MainWindow::plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std
 			threads[i].l.unlock();
 		}
 	}
-	QSplineSeries *series3 = new QSplineSeries;
-	for (auto i : dataPlot3) {
-		series3->append(i);
+	for (int zi = 0; zi < z_array.size(); ++zi)
+	{
+		QSplineSeries *series3 = new QSplineSeries;
+		size_t offset = zi * n;
+		for (int i = offset; i < dataPlot3.size() / z_array.size() + offset; ++i) {
+			if (dataPlot3[i].x() != dataPlot3[i].x() || dataPlot3[i].y() != dataPlot3[i].y()) {
+				qDebug() << "NAN IGNORING";
+				continue;
+			}
+			series3->append(dataPlot3[i]);
+		}
+		series3->setColor(QColor::fromRgb(0,0, zi * 20 + 20));
+		auto pen = series3->pen();
+		pen.setWidth(2);
+		series3->setPen(pen);
+		chart->addSeries(series3);
 	}
 
 
 	chart->legend()->setAlignment(Qt::AlignBottom);
-	chart->addSeries(series3);
+	// chart->addSeries(series3);
 	chart->createDefaultAxes();
 
 	chartView->setRenderHint(QPainter::Antialiasing);
@@ -321,7 +343,7 @@ void MainWindow::plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std
 	axisX->setLabelsVisible(1);
 	axisX->setTitleText("y, мм");
 	axisY->setTitleText("x, мм");
-
+	return dataPlot3;
 }
 RefrLogicData MainWindow::get_value_from_input()
 {

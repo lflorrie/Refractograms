@@ -1,8 +1,6 @@
 #ifndef MATH_UTILS_H
 #define MATH_UTILS_H
 
-#include <gsl/gsl_integration.h>
-
 #include <boost/math/quadrature/gauss_kronrod.hpp>
 #include <boost/math/tools/roots.hpp>
 
