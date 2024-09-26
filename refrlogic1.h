@@ -30,7 +30,7 @@ public:
         data.deltaR = -1.669;
         data.z1 = 440;
         data.T0 = 180;
-        data.deltaT = -150;
+		data.deltaT = -150;
         data.x0 = 20;
     }
     void testFunc() {
@@ -103,7 +103,8 @@ public:
         this->d = d;
         auto integr = [&](double r){ return func_integr(r, fi, d); };
         try  {
-        return func_alpha0(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr, func_r0(fi, d), func_rn(fi, d));
+		// return func_alpha0(fi, d) + simpsonIntegral<decltype(integr)>(integr, func_r0(fi, d), func_rn(fi, d), N_INTEGRAL);
+		return func_alpha0(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr, func_r0(fi, d), func_rn(fi, d), 15, 1e-9);
         } catch (std::exception &ex){
             qDebug() << "ALPHA N";
             exit(1);
@@ -115,7 +116,8 @@ public:
         this->d = d;
         auto integr = [&](double r){ return func_integr(r, fi, d); };
         try {
-        return func_alpha0(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr, func_r0(fi, d), r1);
+		// return func_alpha0(fi, d) + simpsonIntegral<decltype(integr)>(integr, func_r0(fi, d), r1, N_INTEGRAL);
+		return func_alpha0(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr, func_r0(fi, d), r1, 15, 1e-9);
         } catch (std::exception &ex){
             qDebug() << "ALPHA 1";
             exit(1);
@@ -132,11 +134,13 @@ public:
     inline double func_alpha2(double r2, double fi, double d) {
         auto integr = [&](double r){ return func_integr(r, fi, d); };
         try {
-            return func_alphan(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr,  r2, func_rn(fi, d));
+			// return func_alphan(fi, d) + simpsonIntegral<decltype(integr)>(integr, r2, func_rn(fi, d), N_INTEGRAL);
+			return func_alphan(fi, d) + boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integr,  r2, func_rn(fi, d), 15, 1e-9);
         } catch (std::exception &ex){
             qDebug() << "ALPHA 2" << r2 << func_rn(fi, d);
             exit(2);
         }
+
     }
 
     inline double func_x2(double r2, double fi, double d) {
@@ -147,20 +151,21 @@ public:
     }
 
     inline double func_r(double fi, double d, double z) {
-        auto func_tmp = [&](double r) { return func_z2(r, fi, d) - z; };
-//        boost::math::tools::eps_tolerance<double> tol(std::numeric_limits<double>::digits - 3);
-//        boost::uintmax_t it = 20;
-//        auto res = boost::math::tools::toms748_solve(func_tmp, 0.0, data.R * 8, [](double a, double b) { return (b - a) < 0.001; }, it);
-//        try {
-//            auto res = boost::math::tools::bracket_and_solve_root(func_tmp, z * 3, 2.0, true, [](double a, double b) { return std::abs(b - a) < 0.01; }, it);
-//            qDebug () << "RES.FIRST" << res.first;
-//            return res.first;
-//        } catch (std::exception &ex){
-//            qDebug() << "SOLVEEEE!" << ex.what();
-//            qDebug() << fi << d << z;
-//            exit (1);
-//        }
-        return FindRoot(func_tmp, z * 1.5, z * 3);
+		auto func_tmp = [&](double r) { return func_z2(r, fi, d) - z; };
+	   // boost::math::tools::eps_tolerance<double> tol(std::numeric_limits<double>::digits - 3);
+	   // boost::uintmax_t it = 20;
+	   // auto res = boost::math::tools::toms748_solve(func_tmp, 0.0, data.R * 8, [](double a, double b) { return (b - a) < 0.001; }, it);
+	   // return res.first;
+	   // try {
+		  //  auto res = boost::math::tools::bracket_and_solve_root(func_tmp, z * 3, 2.0, true, [](double a, double b) { return std::abs(b - a) < 0.01; }, it);
+		  //  qDebug () << "RES.FIRST" << res.first;
+		  //  return res.first;
+	   // } catch (std::exception &ex){
+		  //  qDebug() << "SOLVEEEE!" << ex.what();
+		  //  qDebug() << fi << d << z;
+		  //  exit (1);
+	   // }
+		return FindRoot(func_tmp, z, z * 3);
     }
 
     inline double func_x(double fi, double d, double z) {
@@ -207,8 +212,9 @@ public:
     }
 
 
+
     void calculate() {
-//        testFunc();
+	   testFunc();
         auto startTime = std::chrono::steady_clock::now();
 
 
@@ -248,7 +254,7 @@ public:
     }
 private:
     RefrLogicData data;
-    int N_INTEGRAL = 1000;
+	int N_INTEGRAL = 10000;
     double fi;
     double d;
     /* 1 000 000

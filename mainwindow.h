@@ -31,6 +31,7 @@ private slots:
 private:
 	void plot2Dfunc_t(QChartView *chartView, QChart *chart);
 	void plot2Dfunc_n(QChartView *chartView, QChart *chart);
+	void plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std::vector<double> &z_array);
     RefrLogicData get_value_from_input();
 private:
 	// Plot for func_t
