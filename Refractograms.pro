@@ -9,21 +9,21 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    chartview.cpp \
-    main.cpp \
-    mainwindow.cpp \
-    math_utils.cpp \
-    refrlogic1.cpp \
-    settings.cpp \
-    settingschartview.cpp
+    src/chartview.cpp \
+    src/main.cpp \
+    src/mainwindow.cpp \
+    src/math_utils.cpp \
+    src/refrlogic1.cpp \
+    src/settings.cpp \
+    src/settingschartview.cpp
 
 HEADERS += \
-    chartview.h \
-    mainwindow.h \
-    math_utils.h \
-    refrlogic1.h \
-    settings.h \
-    settingschartview.h
+    include/chartview.h \
+    include/mainwindow.h \
+    include/math_utils.h \
+    include/refrlogic1.h \
+    include/settings.h \
+    include/settingschartview.h
 
 FORMS += \
     mainwindow.ui
