@@ -14,26 +14,16 @@ SOURCES += \
     mainwindow.cpp \
     math_utils.cpp \
     refrlogic1.cpp \
-    scattergraph.cpp \
-    scatterdatamodifier.cpp \
     settings.cpp \
-    settingschartview.cpp \
-    surfacegraph.cpp \
-    surfacegraphmodifier.cpp \
-    axesinputhandler.cpp
+    settingschartview.cpp
 
 HEADERS += \
     chartview.h \
     mainwindow.h \
     math_utils.h \
     refrlogic1.h \
-    scattergraph.h \
-    scatterdatamodifier.h \
     settings.h \
-    settingschartview.h \
-    surfacegraph.h \
-    surfacegraphmodifier.h \
-    axesinputhandler.h
+    settingschartview.h
 
 FORMS += \
     mainwindow.ui
