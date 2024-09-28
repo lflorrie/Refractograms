@@ -13,13 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
 	m_font.setBold(1);
 	m_font.setPixelSize(20);
 
-    qDebug() << "OK";
-
-
-	const QSize screenSize = ui->tabWidget->screen()->size();
-    const QSize minimumGraphSize{screenSize.width() / 2, qRound(screenSize.height() / 1.75)};
-
-    plot2DPlotRefr1();
+	initRefr1();
+	// plot2DPlotRefr1();
 	qInfo() << "Main window created";
 }
 
@@ -29,196 +24,138 @@ MainWindow::~MainWindow()
 	qInfo() << "Main window deleted";
 }
 
+void MainWindow::initRefr1() {
+	for (int i = 0; i < m_charts.TAB_MAX; ++i)
+	{
+		m_charts.charts[i] = new QChart;
+		m_charts.chartViews[i] = new QChartView(m_charts.charts[i]);
+		m_charts.chartViews[i]->setRubberBand(QChartView::RectangleRubberBand);
+		m_charts.chartViews[i]->setRenderHint(QPainter::Antialiasing);
+		m_charts.charts[i]->legend()->setAlignment(Qt::AlignBottom);
+		m_charts.charts[i]->setTitleFont(m_font);
+		m_charts.charts[i]->setTitle(m_charts.labels[i].title);
+	}
+	ui->tab->layout()->addWidget(m_charts.chartViews[m_charts.TAB_1]);
+	ui->tab_2->layout()->addWidget(m_charts.chartViews[m_charts.TAB_2]);
+	ui->tab_3->layout()->addWidget(m_charts.chartViews[m_charts.TAB_3_1]);
+	ui->tab_3->layout()->addWidget(m_charts.chartViews[m_charts.TAB_3_2]);
+
+	m_charts.scatter3d = new Q3DScatter;
+	QWidget *container = QWidget::createWindowContainer(m_charts.scatter3d);
+	ui->tab_4->layout()->addWidget(container);
+
+	m_charts.scatter3d->setAspectRatio(1.0); // TODO: make settings ?
+	m_charts.scatter3d->setHorizontalAspectRatio(1.0);
+}
+
 void MainWindow::plot2DPlotRefr1() {
-	// TAB 1
 	qInfo() << "TAB1";
-	chart1 = new QChart;
-	QChartView *chartView = new QChartView(chart1);
-	chartView->setRubberBand(QChartView::RectangleRubberBand);
-	plot2Dfunc_t(chartView, chart1);
-	auto layoutTab1 = ui->tab->layout();
-	layoutTab1->addWidget(chartView);
+	plot2Dfunc_t(m_charts.TAB_1);
 
-	// TAB 2
 	qInfo() << "TAB2";
-	chart2 = new QChart;
-	QChartView *chartView2 = new QChartView(chart2);
-	chartView2->setRubberBand(QChartView::RectangleRubberBand);
+	plot2Dfunc_n(m_charts.TAB_2);
 
-	plot2Dfunc_n(chartView2, chart2);
-	auto layoutTab2 = ui->tab_2->layout();
-	layoutTab2->addWidget(chartView2);
+	// TODO: Need refactoring. Remove const values.
+	qInfo() << "TAB3_1";
+	plot2Dfunc_refr(m_charts.chartViews[m_charts.TAB_3_1], m_charts.charts[m_charts.TAB_3_1], {25});
 
-
-	// TAB 3
-	qInfo() << "TAB3";
-
-	QChart *chart3 = new QChart();
-	QChart *chart3_2 = new QChart();
-	chart3->setTitle("Рефракционная картина");
-	chart3_2->setTitle("Рефракционная картина");
-
-	QChartView *chartView3 = new QChartView(chart3);
-	QChartView *chartView3_2 = new QChartView(chart3_2);
-	chartView3->setRubberBand(QChartView::RectangleRubberBand);
-	chartView3_2->setRubberBand(QChartView::RectangleRubberBand);
-
-	plot2Dfunc_refr(chartView3, chart3, {25});
+	// TODO: Need refactoring. Remove const values.
 	qInfo() << "TAB3_2";
 	std::vector<double> z_array;
-	double n = 9;
+	double n = 3;
 	for (int i = 0; i < (int)n; ++i)
 	{
 		z_array.push_back(25 + i * 25);
 	}
-	auto data_ = plot2Dfunc_refr(chartView3_2, chart3_2, z_array);
-
-	auto layoutTab3 = ui->tab_3->layout();
-
-	layoutTab3->addWidget(chartView3);
-	layoutTab3->addWidget(chartView3_2);
+	auto data_ = plot2Dfunc_refr(m_charts.chartViews[m_charts.TAB_3_2], m_charts.charts[m_charts.TAB_3_2], z_array);
 
 	// TAB 4
-	QScatterDataArray *dataArray = new QScatterDataArray;
-	dataArray->reserve(1000);
+	QScatterDataArray dataArray;
+	dataArray.reserve(1000);
 
-	Q3DScatter *scatter3d = new Q3DScatter;
-	for (int i = 0; i < 9; ++i)
+	for (int i = 0; i < n; ++i)
 	{
 		for (int j = 0; j < 100; ++j)
 		{
 			if (data_[j + i * 100].x() != data_[j + i * 100].x() ||
 				data_[j + i * 100].y() != data_[j + i * 100].y())
 				continue;
-			dataArray->append(QScatterDataItem({(float)(25 + i * 25) , (float)data_[j + i * 100].y(), -(float)data_[j + i * 100].x()}));
+			dataArray.append(QScatterDataItem({(float)(25 + i * 25) , (float)data_[j + i * 100].y(), -(float)data_[j + i * 100].x()}));
 
 		}
 		qDebug() << i;
 	}
-	qDebug() << "Show Scatter:";
+
 	QScatter3DSeries *series = new QScatter3DSeries;
-	series->dataProxy()->addItems(*dataArray);
+	series->dataProxy()->addItems(dataArray);
 
-	// ax_->setAutoAdjustRange(1);
-	// scatter3d->setAxisZ(ax_);
-	scatter3d->setAspectRatio(1.0);
-
+	// tab4 settings
 	series->setItemSize(0.1);
 	auto grad = QLinearGradient();
 	grad.setColorAt(0, Qt::red);
 	grad.setColorAt(1, Qt::blue);
-
 	series->setBaseGradient(grad);
 	series->setColorStyle(Q3DTheme::ColorStyleRangeGradient);
-	// series->setBaseGradient()
-	// series->setBaseColor(QColor::fromRgb(0, 0, 200));
-	QWidget *container = QWidget::createWindowContainer(scatter3d);
-	scatter3d->setHorizontalAspectRatio(1.0);
-	// scatter3d->seriesList().at(0)->dataProxy()->resetArray(dataArray);
 	series->setMeshSmooth(1);
-	scatter3d->addSeries(series);
-	auto layout4 = ui->tab_4->layout();
-	layout4->addWidget(container);
+	if (!m_charts.scatter3d->seriesList().empty())
+		m_charts.scatter3d->removeSeries(m_charts.scatter3d->seriesList().at(0));
+	m_charts.scatter3d->addSeries(series);
+
 	qInfo() << "plot2DPlotRefr1 end";
+	setAxis2D();
 }
 
 
 void MainWindow::on_pushButton_clicked()
 {
 	qInfo() << "Button clicked. Updating fields for func_t and func_n.";
-    refr1.set_values(get_value_from_input());
-//    plot2DPlotRefr1();
-    auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 2, 100);
-    //    auto dataPlot1 = refr1.makePlotFuncT(refr1.getR(), refr1.getR() + 2, 100);
-	auto dataPlot2 = refr1.make2DPlot([&](double x) { return refr1.func_n(x);}, refr1.getR(), refr1.getR() + 2, 100);
+	refr1.set_values(getValuesFromInput());
+	plot2DPlotRefr1();
+}
 
+void MainWindow::setAxis2D() {
+	for (int i = 0; i < m_charts.TAB_MAX; ++i)
 	{
-		QSplineSeries *series = new QSplineSeries;
-		series->setName("func t");
-		for (auto i : dataPlot1) {
-			series->append(i);
-		}
-		this->chart1->removeAllSeries();
-		this->chart1->addSeries(series);
-	}
-
-	{
-		QSplineSeries *series = new QSplineSeries;
-		series->setName("func n");
-		for (auto i : dataPlot1) {
-			series->append(i);
-		}
-		this->chart2->removeAllSeries();
-		this->chart2->addSeries(series);
+		m_charts.charts[i]->createDefaultAxes();
+		QValueAxis *axisX = static_cast<QValueAxis *>(m_charts.charts[i]->axes().at(0));
+		QValueAxis *axisY = static_cast<QValueAxis *>(m_charts.charts[i]->axes(Qt::Vertical).at(0));
+		// axisX->setTickType(QValueAxis::TicksDynamic); // TODO: add to settings
+		// axisX->setTickInterval(0.5); // TODO: add to settings
+		axisX->setLabelsEditable(1);
+		axisX->setLabelsVisible(1);
+		axisX->setTitleText(m_charts.labels[i].axisXTitle);
+		axisY->setTitleText(m_charts.labels[i].axisYTitle);
 	}
 }
 
-void MainWindow::plot2Dfunc_t(QChartView *chartView, QChart *chart)
+void MainWindow::plot2Dfunc_t(int index)
 {
-	if (!chartView || !chart)
+	if (index < 0 || index >= m_charts.TAB_MAX)
 		return;
-
-	auto dataPlot1 = refr1.make2DPlot([&](double x) { return refr1.func_t(x);} , refr1.getR(), refr1.getR() + 10, 100);
-	//    auto dataPlot1 = refr1.makePlotFuncT(refr1.getR(), refr1.getR() + 2, 100);
-
 	QSplineSeries *series = new QSplineSeries;
-	series->setName("func t");
-	for (auto i : dataPlot1) {
+
+	std::vector<QPointF> dataPlot = refr1.make2DPlot([&](double x) { return refr1.func_t(x);}, refr1.getR(), refr1.getR() + 10, 100);
+
+	m_charts.charts[index]->removeAllSeries();
+	for (auto i : dataPlot) {
 		series->append(i);
 	}
-
-	chart->addSeries(series);
-	chart->createDefaultAxes();
-	chart->setTitle("Зависимость температуры вдоль радиальной координаты");
-
-	// Grid settings
-	QValueAxis *axisX = static_cast<QValueAxis *>(chart->axes().at(0));
-	QValueAxis *axisY = static_cast<QValueAxis *>(chart->axes(Qt::Vertical).at(0));
-	axisX->setTickType(QValueAxis::TicksDynamic);
-	axisX->setTickInterval(0.5);
-
-
-	// chart->addAxis(axisY, Qt::AlignLeft);
-	chartView->setRenderHint(QPainter::Antialiasing);
-	chart->legend()->setAlignment(Qt::AlignBottom);
-
-	chart->setTitleFont(m_font);
-
-	axisX->setLabelsEditable(1);
-	axisX->setLabelsVisible(1);
-	axisX->setTitleText("x, мм");
-	axisY->setTitleText("T, °С");
+	m_charts.charts[index]->addSeries(series);
 }
 
-void MainWindow::plot2Dfunc_n(QChartView *chartView, QChart *chart)
+void MainWindow::plot2Dfunc_n(int index)
 {
-	if (!chartView || !chart)
+	if (index < 0 || index >= m_charts.TAB_MAX)
 		return;
-	auto dataPlot2 = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , refr1.getR(), refr1.getR() + 10, 100);
-	QSplineSeries *series2 = new QSplineSeries;
-	series2->setName("func n");
-	for (auto i : dataPlot2) {
-		series2->append(i);
+	QSplineSeries *series = new QSplineSeries;
+
+	std::vector<QPointF> dataPlot = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , refr1.getR(), refr1.getR() + 10, 100);
+
+	m_charts.charts[index]->removeAllSeries();
+	for (auto i : dataPlot) {
+		series->append(i);
 	}
-	chart->setTitle("Зависимость показателя преломления вдоль радиальной координаты");
-	chart->legend()->setAlignment(Qt::AlignBottom);
-	chart->addSeries(series2);
-	chart->createDefaultAxes();
-
-	chartView->setRenderHint(QPainter::Antialiasing);
-
-	chart->setTitleFont(m_font);
-
-	// Grid settings
-	QValueAxis *axisX = static_cast<QValueAxis *>(chart->axes().at(0));
-	QValueAxis *axisY = static_cast<QValueAxis *>(chart->axes(Qt::Vertical).at(0));
-	axisX->setTickType(QValueAxis::TicksDynamic);
-	axisX->setTickInterval(0.5);
-
-	axisX->setLabelsEditable(1);
-	axisX->setLabelsVisible(1);
-	axisX->setTitleText("r, мм");
-	axisY->setTitleText("n");
+	m_charts.charts[index]->addSeries(series);
 }
 #if 0
 void MainWindow::plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std::vector<double> &z_array)
@@ -262,12 +199,10 @@ struct thread_{
 	std::thread t;
 	std::mutex l;
 };
-void async_calculate()
-{
 
-}
 std::vector<QPointF> MainWindow::plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std::vector<double> &z_array)
 {
+	chart->removeAllSeries();
 	double fi_min = -M_PI_4;
 	double fi_max = M_PI_4;
 	int n = 100;
@@ -335,39 +270,20 @@ std::vector<QPointF> MainWindow::plot2Dfunc_refr(QChartView *chartView, QChart *
 		series3->setPen(pen);
 		chart->addSeries(series3);
 	}
-
-
-	chart->legend()->setAlignment(Qt::AlignBottom);
-	// chart->addSeries(series3);
-	chart->createDefaultAxes();
-
-	chartView->setRenderHint(QPainter::Antialiasing);
-
-	chart->setTitleFont(m_font);
-
-	// Grid settings
-	QValueAxis *axisX = static_cast<QValueAxis *>(chart->axes().at(0));
-	QValueAxis *axisY = static_cast<QValueAxis *>(chart->axes(Qt::Vertical).at(0));
-	axisX->setTickType(QValueAxis::TicksDynamic);
-	axisX->setTickInterval(20);
-
-	axisX->setLabelsEditable(1);
-	axisX->setLabelsVisible(1);
-	axisX->setTitleText("y, мм");
-	axisY->setTitleText("x, мм");
 	return dataPlot3;
 }
-RefrLogicData MainWindow::get_value_from_input()
+
+RefrLogicData MainWindow::getValuesFromInput()
 {
     RefrLogicData data;
-    data.R = ui->lineEdit->text().toDouble();
-    data.a = ui->lineEdit_2->text().toDouble();
-    data.z0 = ui->lineEdit_3->text().toDouble();
+	data.R		= ui->lineEdit->text().toDouble();
+	data.a		= ui->lineEdit_2->text().toDouble();
+	data.z0		= ui->lineEdit_3->text().toDouble();
     data.deltaR = ui->lineEdit_4->text().toDouble();
-    data.z1 = ui->lineEdit_5->text().toDouble();
-    data.T0 = ui->lineEdit_6->text().toDouble();
+	data.z1		= ui->lineEdit_5->text().toDouble();
+	data.T0		= ui->lineEdit_6->text().toDouble();
     data.deltaT = ui->lineEdit_7->text().toDouble();
-    data.x0 = ui->lineEdit_8->text().toDouble();
+	data.x0		= ui->lineEdit_8->text().toDouble();
     return data;
 }
 

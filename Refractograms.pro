@@ -21,6 +21,7 @@ HEADERS += \
     include/chartview.h \
     include/mainwindow.h \
     include/math_utils.h \
+    include/refrcharts.h \
     include/refrlogic1.h \
     include/settings.h \
     include/settingschartview.h
