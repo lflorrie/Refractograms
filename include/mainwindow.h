@@ -20,22 +20,15 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-	void initRefr1();
-    void plot2DPlotRefr1();
-
 private slots:
     void on_pushButton_clicked();
+	void on_actionSaveAll();
 private:
-	void plot2Dfunc_t(int index);
-	void plot2Dfunc_n(int index);
-	std::vector<QPointF> plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std::vector<double> &z_array);
 	RefrLogicData getValuesFromInput();
-	void setAxis2D();
 private:
-    RefrLogic1 refr1;
-
-	RefrCharts		m_charts;
+	RefrCharts		*m_charts;
 	QFont			m_font;
     Ui::MainWindow *ui;
+	QThread thread;
 };
 #endif // MAINWINDOW_H

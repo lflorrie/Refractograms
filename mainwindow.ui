@@ -216,18 +216,9 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>Open</string>
+     <string>File</string>
     </property>
-   </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>Edit</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuSave">
-    <property name="title">
-     <string>Save</string>
-    </property>
+    <addaction name="actionSave_all"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
@@ -235,11 +226,14 @@
     </property>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
-   <addaction name="menuSave"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSave_all">
+   <property name="text">
+    <string>Save All</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>lineEdit</tabstop>

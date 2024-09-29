@@ -248,9 +248,17 @@ public:
         return data.R;
     }
 
-    void set_values(const RefrLogicData &new_data)
+	void set_values(const RefrLogicData &new_data)
     {
-        data = new_data;
+		// data = new_data;
+		data.R = new_data.R;
+		data.T0 = new_data.T0;
+		data.a = new_data.a;
+		data.deltaR = new_data.deltaR;
+		data.deltaT = new_data.deltaT;
+		data.x0 = new_data.x0;
+		data.z0 = new_data.z0;
+		data.z1 = new_data.z1;
     }
 private:
     RefrLogicData data;

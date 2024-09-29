@@ -13,7 +13,9 @@ SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
     src/math_utils.cpp \
+    src/refrcharts.cpp \
     src/refrlogic1.cpp \
+    src/refrworker.cpp \
     src/settings.cpp \
     src/settingschartview.cpp
 
@@ -23,6 +25,7 @@ HEADERS += \
     include/math_utils.h \
     include/refrcharts.h \
     include/refrlogic1.h \
+    include/refrworker.h \
     include/settings.h \
     include/settingschartview.h
 

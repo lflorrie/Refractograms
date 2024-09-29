@@ -1,0 +1,137 @@
+#include "refrcharts.h"
+#include <QValueAxis>
+#include <QLayout>
+RefrCharts::RefrCharts()
+{
+	initRefr1();
+}
+
+RefrCharts::RefrCharts(const std::vector<QLayout *> layouts, QFont *font)
+{
+	m_layouts = layouts;
+	m_font = *font;
+	initRefr1();
+	workerIsRunning = false;
+	std::cout << "RefrCharts thread id: " << std::this_thread::get_id() << std::endl;
+
+}
+
+void RefrCharts::initRefr1() {
+	for (int i = 0; i < TAB_MAX; ++i)
+	{
+		charts[i] = new QChart;
+		chartViews[i] = new QChartView(charts[i]);
+		chartViews[i]->setRubberBand(QChartView::RectangleRubberBand);
+		chartViews[i]->setRenderHint(QPainter::Antialiasing);
+		charts[i]->legend()->setAlignment(Qt::AlignBottom);
+		charts[i]->setTitleFont(m_font);
+		charts[i]->setTitle(labels[i].title);
+	}
+	if (m_layouts.size() >= 3)
+	{
+		m_layouts[0]->addWidget(chartViews[TAB_1]);
+		m_layouts[1]->addWidget(chartViews[TAB_2]);
+		m_layouts[2]->addWidget(chartViews[TAB_3_1]);
+		m_layouts[2]->addWidget(chartViews[TAB_3_2]);
+	}
+
+	scatter3d = new Q3DScatter;
+	container = QWidget::createWindowContainer(scatter3d);
+	if (m_layouts.size() >= 4)
+		m_layouts[3]->layout()->addWidget(container);
+
+	scatter3d->setAspectRatio(1.0); // TODO: make settings ?
+	scatter3d->setHorizontalAspectRatio(1.0);
+}
+
+void RefrCharts::plot2DPlotRefr1(const RefrLogicData &values)
+{
+	if (workerIsRunning)
+	{
+		qInfo() << "Wo3rker is running.";
+		return;
+	}
+	workerIsRunning = 1;
+	refrWorker = new RefrWorker;
+	thread = new QThread;
+	refrWorker->setValues(values);
+	refrWorker->moveToThread(thread);
+	connect(thread, &QThread::started, refrWorker, &RefrWorker::process);
+	connect(refrWorker, &RefrWorker::finished, this, &RefrCharts::onWorkerFinished);
+	connect(refrWorker, &RefrWorker::finished, thread, &QThread::quit);
+	connect(thread, &QThread::finished, refrWorker, &QObject::deleteLater);
+	connect(thread, &QThread::finished, thread, &QObject::deleteLater);
+
+	qInfo() << "Worker start.";
+	thread->start();
+}
+void RefrCharts::setAxis2D() {
+	for (int i = 0; i < TAB_MAX; ++i)
+	{
+		charts[i]->createDefaultAxes();
+		QValueAxis *axisX = static_cast<QValueAxis *>(charts[i]->axes().at(0));
+		QValueAxis *axisY = static_cast<QValueAxis *>(charts[i]->axes(Qt::Vertical).at(0));
+		// axisX->setTickType(QValueAxis::TicksDynamic); // TODO: add to settings
+		// axisX->setTickInterval(0.5); // TODO: add to settings
+		axisX->setLabelsEditable(1);
+		axisX->setLabelsVisible(1);
+		axisX->setTitleText(labels[i].axisXTitle);
+		axisY->setTitleText(labels[i].axisYTitle);
+	}
+}
+
+void RefrCharts::onWorkerFinished()
+{
+	std::cout << "onWorkerFinished thread id: " << std::this_thread::get_id() << std::endl;
+
+	auto data = refrWorker->getData();
+	// append data
+	std::vector<QSplineSeries *>splines[4];
+	for (int i = 0 ; i < 3; ++i)
+	{
+		splines[i].push_back(new QSplineSeries());
+	}
+	for (int i = 0 ; i < 3; ++i)
+	{
+		splines[TAB_3_2].push_back(new QSplineSeries());
+	}
+	for (auto &i : data->dataPlot[TAB_1]) {
+		splines[TAB_1].front()->append(i);
+	}
+	for (auto &i : data->dataPlot[TAB_2]) {
+		splines[TAB_2].front()->append(i);
+	}
+	for (size_t zi = 0; zi < 1; ++zi) {
+		for (int i = 0; i < 100; ++i) { // TODO: const delete
+			if (data->dataPlot[TAB_3_1][i].x() != data->dataPlot[TAB_3_1][i].x() ||
+				data->dataPlot[TAB_3_1][i].y() != data->dataPlot[TAB_3_1][i].y())
+				continue;
+			splines[RefrCharts::TAB_3_1][zi]->append(data->dataPlot[TAB_3_1][i + zi * 100]);
+		}
+	}
+
+	for (size_t zi = 0; zi < 3; ++zi) { // TODO: CONST DELETE
+		for (int i = 0; i < 100; ++i) {// TODO: const delete
+			if (data->dataPlot[TAB_3_2][i].x() != data->dataPlot[TAB_3_2][i].x() ||
+				data->dataPlot[TAB_3_2][i].y() != data->dataPlot[TAB_3_2][i].y())
+				continue;
+			splines[RefrCharts::TAB_3_2][zi]->append(data->dataPlot[TAB_3_2][i + zi * 100]);
+		}
+	}
+
+
+
+	for (int i = 0; i < TAB_MAX; ++i)
+	{
+		charts[i]->removeAllSeries();
+		for (auto &spline : splines[i])
+			charts[i]->addSeries(spline);
+	}
+
+	if (!scatter3d->seriesList().empty())
+		scatter3d->removeSeries(scatter3d->seriesList().at(0));
+	scatter3d->addSeries(data->scatter3d);
+
+	setAxis2D();
+	workerIsRunning = false;
+}
