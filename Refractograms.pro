@@ -1,4 +1,4 @@
-QT       += core gui charts
+QT += core gui charts
 QT += datavisualization
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -9,25 +9,25 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    main.cpp \
-    mainwindow.cpp \
-    math_utils.cpp \
-    refrlogic1.cpp \
-    scattergraph.cpp \
-    scatterdatamodifier.cpp \
-    surfacegraph.cpp \
-    surfacegraphmodifier.cpp \
-    axesinputhandler.cpp
+    src/chartview.cpp \
+    src/main.cpp \
+    src/mainwindow.cpp \
+    src/math_utils.cpp \
+    src/refrcharts.cpp \
+    src/refrlogic1.cpp \
+    src/refrworker.cpp \
+    src/settings.cpp \
+    src/settingschartview.cpp
 
 HEADERS += \
-    mainwindow.h \
-    math_utils.h \
-    refrlogic1.h \
-    scattergraph.h \
-    scatterdatamodifier.h \
-    surfacegraph.h \
-    surfacegraphmodifier.h \
-    axesinputhandler.h
+    include/chartview.h \
+    include/mainwindow.h \
+    include/math_utils.h \
+    include/refrcharts.h \
+    include/refrlogic1.h \
+    include/refrworker.h \
+    include/settings.h \
+    include/settingschartview.h
 
 FORMS += \
     mainwindow.ui
@@ -36,7 +36,7 @@ TRANSLATIONS += \
     Refractograms_ru_RU.ts
 CONFIG += lrelease
 CONFIG += embed_translations
-
+INCLUDEPATH += include
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
