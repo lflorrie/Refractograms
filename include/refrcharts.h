@@ -15,9 +15,6 @@ public:
 	void initRefr1();
 	void plot2DPlotRefr1(const RefrLogicData &values);
 	void setAxis2D();
-	void plot2Dfunc_t(int index);
-	void plot2Dfunc_n(int index);
-	// std::vector<QPointF> plot2Dfunc_refr(QChartView *chartView, QChart *chart, const std::vector<double> &z_array);
 	enum {
 		TAB_1,
 		TAB_2,
@@ -32,10 +29,10 @@ public:
 		QString axisYTitle;
 		QString seriesName;
 	} labels[TAB_MAX] = {
-		{"Зависимость температуры вдоль радиальной координаты", "x, мм", "T, °С", "func t" },
-		{"Зависимость показателя преломления вдоль радиальной координаты","r, мм", "n", "func n"},
-		{"Рефракционная картина","","",""},
-		{"Рефракционная картина","","",""}
+		{tr("Зависимость температуры вдоль радиальной координаты"), tr("x, мм"), tr("T, °С"), tr("func t")},
+		{tr("Зависимость показателя преломления вдоль радиальной координаты"),tr("r, мм"), tr("n"), tr("func n")},
+		{tr("Рефракционная картина"),tr(""),tr(""),tr("")},
+		{tr("Рефракционная картина"),tr(""),tr(""),tr("")}
 	};
 
 	QWidget			*container;

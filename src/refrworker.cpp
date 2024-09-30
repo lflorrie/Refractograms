@@ -3,23 +3,16 @@
 
 RefrWorker::RefrWorker()
 {
-	std::cout << "RefrWorker thread id: " << std::this_thread::get_id() << std::endl;
 }
 
 void RefrWorker::process()
 {
-	double n = 3;
-	std::cout << "RefrWorker process thread id: " << std::this_thread::get_id() << std::endl;
+	int		count_z = refr1.getData().z_settings.count;
+	double	R = refr1.getData().R;
+	int		count_of_points = refr1.getData().z_settings.count_of_points;
+	double  start = refr1.getData().z_settings.start;
+	double  step = refr1.getData().z_settings.step;
 
-	// clear splines
-	// for (int i = 0 ; i < 3; ++i)
-	// {
-	// 	data.splines[i].push_back(new QSplineSeries());
-	// }
-	// for (int i = 0; i < n; ++i)
-	// {
-	// 	data.splines[RefrCharts::TAB_3_2].push_back(new QSplineSeries());
-	// }
 	data.scatter3d = new QScatter3DSeries;
 	for (int i = 0; i < RefrCharts::TAB_MAX; ++i)
 	{
@@ -28,35 +21,33 @@ void RefrWorker::process()
 
 	// calculation
 	qInfo() << "TAB1";
-	data.dataPlot[RefrCharts::TAB_1] = refr1.make2DPlot([&](double x) { return refr1.func_t(x);}, refr1.getR(), refr1.getR() + 10, 100);
+	data.dataPlot[RefrCharts::TAB_1] = refr1.make2DPlot([&](double x) { return refr1.func_t(x);}, R, R + 10, count_of_points);
 	qInfo() << "TAB2";
-	data.dataPlot[RefrCharts::TAB_2] = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , refr1.getR(), refr1.getR() + 10, 100);
+	data.dataPlot[RefrCharts::TAB_2] = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , R, R + 10, count_of_points);
 	qInfo() << "TAB3_1";
 
-	data.dataPlot[RefrCharts::TAB_3_1] = plot2Dfunc_refr({25});
+	data.dataPlot[RefrCharts::TAB_3_1] = plot2Dfunc_refr({refr1.getData().z_settings.current});
 	qInfo() << "TAB3_2";
 	std::vector<double> z_array;
-	for (int i = 0; i < (int)n; ++i)
+	for (int i = 0; i < count_z; ++i)
 	{
-		z_array.push_back(25 + i * 25);
+		z_array.push_back(start + i * step);
 	}
-	data.dataPlot[RefrCharts::TAB_3_2] =plot2Dfunc_refr(z_array);
+	data.dataPlot[RefrCharts::TAB_3_2] = plot2Dfunc_refr(z_array);
 
 	// TAB 4
 	QScatterDataArray dataArray;
-	dataArray.reserve(1000);
+	dataArray.reserve(count_of_points * count_z);
 
-	for (int i = 0; i < n; ++i)
+	for (int i = 0; i < count_z; ++i)
 	{
-		for (int j = 0; j < 100; ++j)
+		for (int j = 0; j < count_of_points; ++j)
 		{
-			if (data.dataPlot[RefrCharts::TAB_3_2][j + i * 100].x() != data.dataPlot[RefrCharts::TAB_3_2][j + i * 100].x() ||
-				data.dataPlot[RefrCharts::TAB_3_2][j + i * 100].y() != data.dataPlot[RefrCharts::TAB_3_2][j + i * 100].y())
+			if (data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].x() != data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].x() ||
+				data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].y() != data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].y())
 				continue;
-			dataArray.append(QScatterDataItem({(float)(25 + i * 25) , (float)data.dataPlot[RefrCharts::TAB_3_2][j + i * 100].y(), -(float)data.dataPlot[RefrCharts::TAB_3_2][j + i * 100].x()}));
-
+			dataArray.append(QScatterDataItem({(float)(start + i * step) , (float)data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].y(), -(float)data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].x()}));
 		}
-		qDebug() << i;
 	}
 
 	data.scatter3d->dataProxy()->addItems(dataArray);
@@ -76,18 +67,22 @@ void RefrWorker::process()
 
 RefrWorker::SeriesData *RefrWorker::getData()
 {
-	std::cout << "RefrWorker getData thread id: " << std::this_thread::get_id() << std::endl;
 	return &data;
+}
+
+RefrLogic1 RefrWorker::getRefrData() const
+{
+	return refr1;
 }
 
 void RefrWorker::setValues(const RefrLogicData &values)
 {
-	refr1.set_values(values);
+	refr1.setData(values);
 }
 
 struct thread_{
 	std::thread t;
-	std::mutex l;
+	std::mutex  l;
 };
 
 std::vector<QPointF> RefrWorker::plot2Dfunc_refr(const std::vector<double> &z_array)
@@ -95,11 +90,12 @@ std::vector<QPointF> RefrWorker::plot2Dfunc_refr(const std::vector<double> &z_ar
 
 	double fi_min = -M_PI_4;
 	double fi_max = M_PI_4;
-	int n = 100;
+	int n = refr1.getData().z_settings.count_of_points;
 	double fi_step = (fi_max - fi_min) / n;
 	size_t threads_count = std::thread::hardware_concurrency();
 	std::vector<QPointF> dataPlot3(n * z_array.size(), {0.f, 0.f});
 	std::vector<thread_> threads(threads_count);
+
 	qInfo() << "Count of threads: " << threads_count;
 	for (size_t zi = 0; zi < z_array.size(); ++zi)
 	{

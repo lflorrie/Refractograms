@@ -13,7 +13,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 	m_font.setBold(1);
 	m_font.setPixelSize(20);
-	std::cout << "MainWindow thread id: " << std::this_thread::get_id() << std::endl;
 
 	std::vector<QLayout *> layouts;
 	layouts.push_back(ui->tab->layout());
@@ -55,27 +54,27 @@ void MainWindow::on_actionSaveAll()
 		//Need to be handled if more than one QLineEdit found
 	}
 	if(objFlDlg.exec()){
-		// qInfo() << "Save to:" << objFlDlg.directory().absolutePath();
-		// int currentTabIndex = ui->tabWidget->currentIndex();
-		// for (int i = 0; i < m_charts.TAB_MAX; ++i)
-		// {
-		// 	int chartTabIndex = ui->tabWidget->indexOf(m_charts.chartViews[i]->parentWidget());
-		// 	ui->tabWidget->setCurrentIndex(chartTabIndex);
+		qInfo() << "Save to:" << objFlDlg.directory().absolutePath();
+		int currentTabIndex = ui->tabWidget->currentIndex();
+		for (int i = 0; i < m_charts->TAB_MAX; ++i)
+		{
+			int chartTabIndex = ui->tabWidget->indexOf(m_charts->chartViews[i]->parentWidget());
+			ui->tabWidget->setCurrentIndex(chartTabIndex);
 
-		// 	auto size = m_charts.charts[i]->size();
-		// 	auto sizeV = m_charts.chartViews[i]->size();
-		// 	m_charts.charts[i]->resize(1920, 1080);
-		// 	m_charts.chartViews[i]->resize(1920, 1080);
+			auto size = m_charts->charts[i]->size();
+			auto sizeV = m_charts->chartViews[i]->size();
+			m_charts->charts[i]->resize(1920, 1080);
+			m_charts->chartViews[i]->resize(1920, 1080);
 
-		// 	QString filename = QString("%1/test%2.png").arg(objFlDlg.directory().absolutePath()).arg(i);
-		// 	m_charts.chartViews[i]->grab({0, 0, 1920, 1080}).save(filename);
+			QString filename = QString("%1/test%2.png").arg(objFlDlg.directory().absolutePath()).arg(i);
+			m_charts->chartViews[i]->grab({0, 0, 1920, 1080}).save(filename);
 
-		// 	m_charts.charts[i]->resize(size);
-		// 	m_charts.chartViews[i]->resize(sizeV);
+			m_charts->charts[i]->resize(size);
+			m_charts->chartViews[i]->resize(sizeV);
 
-		// }
-		// m_charts.scatter3d->renderToImage(0,{1920, 1080}).save(QString("%1/test3d.png").arg(objFlDlg.directory().absolutePath()));
-		// ui->tabWidget->setCurrentIndex(currentTabIndex);
+		}
+		m_charts->scatter3d->renderToImage(0,{1920, 1080}).save(QString("%1/test3d.png").arg(objFlDlg.directory().absolutePath()));
+		ui->tabWidget->setCurrentIndex(currentTabIndex);
 	}
 }
 
@@ -90,6 +89,12 @@ RefrLogicData MainWindow::getValuesFromInput()
 	data.T0		= ui->lineEdit_6->text().toDouble();
     data.deltaT = ui->lineEdit_7->text().toDouble();
 	data.x0		= ui->lineEdit_8->text().toDouble();
+
+	data.z_settings.count = ui->li_count_z->text().toInt();
+	data.z_settings.count_of_points = ui->li_count_points->text().toInt();
+	data.z_settings.current = ui->li_current_z->text().toDouble();
+	data.z_settings.start = ui->li_start->text().toDouble();
+	data.z_settings.step = ui->li_step->text().toDouble();
     return data;
 }
 
