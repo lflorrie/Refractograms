@@ -14,6 +14,21 @@ MainWindow::MainWindow(QWidget *parent)
 	m_font.setBold(1);
 	m_font.setPixelSize(20);
 
+	progressBar = new QProgressBar();
+	progressBar->setRange(0, 100);
+	progressBar->setValue(0);
+	statusBar()->addPermanentWidget(progressBar);
+
+	// Эффект прозрачности
+	opacityEffect = new QGraphicsOpacityEffect(statusBar());
+	statusBar()->setGraphicsEffect(opacityEffect);
+
+	// Анимация для эффекта прозрачности
+	animationProgressBar = new QPropertyAnimation(opacityEffect, "opacity");
+	animationProgressBar->setDuration(1000);  // Продолжительность анимации 1 секунда
+	animationProgressBar->setStartValue(1.0);  // Начальная непрозрачность
+	animationProgressBar->setEndValue(0.0);    // Конечная непрозрачность
+
 	std::vector<QLayout *> layouts;
 	layouts.push_back(ui->tab->layout());
 	layouts.push_back(ui->tab_2->layout());
@@ -21,10 +36,11 @@ MainWindow::MainWindow(QWidget *parent)
 	layouts.push_back(ui->tab_4->layout());
 
 	m_charts = new RefrCharts(layouts, &m_font);
-
 	// plot2DPlotRefr1();
 	qInfo() << "Main window created";
 	connect(ui->actionSave_all, &QAction::triggered, this, &MainWindow::on_actionSaveAll);
+	connect(m_charts, &RefrCharts::progressChanged, this, &MainWindow::updateProgress);
+	connect(m_charts, &RefrCharts::finished, this, &MainWindow::taskFinished);
 }
 
 MainWindow::~MainWindow()
@@ -76,6 +92,20 @@ void MainWindow::on_actionSaveAll()
 		m_charts->scatter3d->renderToImage(0,{1920, 1080}).save(QString("%1/test3d.png").arg(objFlDlg.directory().absolutePath()));
 		ui->tabWidget->setCurrentIndex(currentTabIndex);
 	}
+}
+
+void MainWindow::updateProgress(int value)
+{
+	qInfo() << "Update progress:" << value;
+	progressBar->setValue(value);
+	opacityEffect->setOpacity(1);
+}
+
+void MainWindow::taskFinished()
+{
+	qInfo() << "Task Finished";
+	animationProgressBar->start();
+	// progressBar->setVisible(false);
 }
 
 RefrLogicData MainWindow::getValuesFromInput()

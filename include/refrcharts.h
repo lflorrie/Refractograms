@@ -47,6 +47,9 @@ public:
 	RefrWorker		*refrWorker;
 public slots:
 	void onWorkerFinished();
+signals:
+	void progressChanged(int value);
+	void finished();
 };
 
 #endif // REFRCHARTS_H

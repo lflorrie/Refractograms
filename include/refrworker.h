@@ -21,6 +21,7 @@ public:
 	void		setValues(const RefrLogicData &values);
 signals:
 	void finished();
+	void progressChanged(int value);
 private:
 	std::vector<QPointF> plot2Dfunc_refr(const std::vector<double> &z_array);
 private:

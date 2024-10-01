@@ -7,6 +7,7 @@ RefrWorker::RefrWorker()
 
 void RefrWorker::process()
 {
+	emit progressChanged(0);
 	int		count_z = refr1.getData().z_settings.count;
 	double	R = refr1.getData().R;
 	int		count_of_points = refr1.getData().z_settings.count_of_points;
@@ -25,8 +26,9 @@ void RefrWorker::process()
 	qInfo() << "TAB2";
 	data.dataPlot[RefrCharts::TAB_2] = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , R, R + 10, count_of_points);
 	qInfo() << "TAB3_1";
-
+	emit progressChanged(5);
 	data.dataPlot[RefrCharts::TAB_3_1] = plot2Dfunc_refr({refr1.getData().z_settings.current});
+	emit progressChanged(10);
 	qInfo() << "TAB3_2";
 	std::vector<double> z_array;
 	for (int i = 0; i < count_z; ++i)
@@ -117,8 +119,8 @@ std::vector<QPointF> RefrWorker::plot2Dfunc_refr(const std::vector<double> &z_ar
 					// qDebug() << "Worker start" << t_index;
 					threads[t_index].t = std::thread([&](double fi, double zi, size_t i, size_t t_index){
 						QPointF point;
-						point.setY(refr1.func_x(fi, 20, zi)); // TODO: Replace constants on variables
-						point.setX(refr1.func_y(fi, 20, zi));
+						point.setY(refr1.func_x(fi, refr1.getData().x0, zi));
+						point.setX(refr1.func_y(fi, refr1.getData().x0, zi));
 						dataPlot3[i] = point;
 						// qDebug() << "Worker end" << t_index;
 						threads[t_index].l.unlock();
@@ -129,6 +131,7 @@ std::vector<QPointF> RefrWorker::plot2Dfunc_refr(const std::vector<double> &z_ar
 			}
 			fi += fi_step;
 		}
+		emit progressChanged(10 + ((zi + 1) / (double)z_array.size() * 90));
 	}
 	for (size_t i = 0; i < threads_count; ++i)
 	{

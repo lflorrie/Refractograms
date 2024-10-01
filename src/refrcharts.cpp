@@ -61,6 +61,10 @@ void RefrCharts::plot2DPlotRefr1(const RefrLogicData &values)
 	connect(thread, &QThread::finished, refrWorker, &QObject::deleteLater);
 	connect(thread, &QThread::finished, thread, &QObject::deleteLater);
 
+	connect(refrWorker, &RefrWorker::finished, this, &RefrCharts::finished);
+	connect(refrWorker, &RefrWorker::progressChanged, this, &RefrCharts::progressChanged);
+
+
 	qInfo() << "Worker start.";
 	thread->start();
 }
