@@ -1,6 +1,7 @@
 #include "refrcharts.h"
 #include <QValueAxis>
 #include <QLayout>
+#include "chartview.h"
 
 RefrCharts::RefrCharts()
 {
@@ -19,7 +20,7 @@ void RefrCharts::initRefr1() {
 	for (int i = 0; i < TAB_MAX; ++i)
 	{
 		charts[i] = new QChart;
-		chartViews[i] = new QChartView(charts[i]);
+		chartViews[i] = new ChartView(charts[i]);
 		chartViews[i]->setRubberBand(QChartView::RectangleRubberBand);
 		chartViews[i]->setRenderHint(QPainter::Antialiasing);
 		charts[i]->legend()->setAlignment(Qt::AlignBottom);
@@ -43,7 +44,7 @@ void RefrCharts::initRefr1() {
 	scatter3d->setHorizontalAspectRatio(1.0);
 }
 
-void RefrCharts::plot2DPlotRefr1(const RefrLogicData &values)
+void RefrCharts::buildPlots(const RefrLogicData &values, RefrCharts::Plots p)
 {
 	if (workerIsRunning)
 	{
@@ -54,6 +55,7 @@ void RefrCharts::plot2DPlotRefr1(const RefrLogicData &values)
 	refrWorker = new RefrWorker;
 	thread = new QThread;
 	refrWorker->setValues(values);
+	// refrWorker->setPlot(p);
 	refrWorker->moveToThread(thread);
 	connect(thread, &QThread::started, refrWorker, &RefrWorker::process);
 	connect(refrWorker, &RefrWorker::finished, this, &RefrCharts::onWorkerFinished);

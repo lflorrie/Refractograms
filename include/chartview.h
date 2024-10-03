@@ -18,7 +18,7 @@ public slots:
 protected:
 	virtual void mousePressEvent(QMouseEvent *event) override;
 private:
-	SettingsChartView settingsDialogWindow;
+	// SettingsChartView settingsDialogWindow;
 };
 
 #endif // CHARTVIEW_H

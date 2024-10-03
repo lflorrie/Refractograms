@@ -63,7 +63,7 @@ void RefrWorker::process()
 	data.scatter3d->setColorStyle(Q3DTheme::ColorStyleRangeGradient);
 	data.scatter3d->setMeshSmooth(1);
 
-	qInfo() << "plot2DPlotRefr1 end";
+	qInfo() << "process end";
 	emit finished();
 }
 

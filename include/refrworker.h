@@ -16,7 +16,9 @@ public:
 	};
 
 	void		process();
+
 	SeriesData  *getData();
+
 	RefrLogic1	getRefrData() const;
 	void		setValues(const RefrLogicData &values);
 signals:

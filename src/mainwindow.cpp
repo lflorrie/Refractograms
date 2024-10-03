@@ -36,9 +36,11 @@ MainWindow::MainWindow(QWidget *parent)
 	layouts.push_back(ui->tab_4->layout());
 
 	m_charts = new RefrCharts(layouts, &m_font);
-	// plot2DPlotRefr1();
+
 	qInfo() << "Main window created";
 	connect(ui->actionSave_all, &QAction::triggered, this, &MainWindow::on_actionSaveAll);
+	connect(ui->actionExport_data, &QAction::triggered, this, &MainWindow::on_actionExportData);
+
 	connect(m_charts, &RefrCharts::progressChanged, this, &MainWindow::updateProgress);
 	connect(m_charts, &RefrCharts::finished, this, &MainWindow::taskFinished);
 }
@@ -52,7 +54,14 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
 	qInfo() << "Button clicked. Updating fields for func_t and func_n.";
-	m_charts->plot2DPlotRefr1(getValuesFromInput());
+	QString tab = ui->comboBox->currentText();
+	RefrCharts::Plots p;
+	if (tab == "All")
+		p = RefrCharts::ALL_PLOTS;
+	if (tab == "3.1")
+		p = RefrCharts::PLOT_3_1;
+
+	m_charts->buildPlots(getValuesFromInput(), p);
 }
 
 void MainWindow::on_actionSaveAll()
@@ -93,7 +102,58 @@ void MainWindow::on_actionSaveAll()
 		ui->tabWidget->setCurrentIndex(currentTabIndex);
 	}
 }
+void MainWindow::on_actionExportData()
+{
+	qInfo() << "Action ExportData";
+	QFileDialog objFlDlg(this);
+	// objFlDlg.setOption(QFileDialog::ShowDirsOnly, true);
+	objFlDlg.setAcceptMode(QFileDialog::AcceptSave);
 
+	QList<QLineEdit *> lst =objFlDlg.findChildren<QLineEdit *>();
+	qDebug() << lst.count();
+	if(lst.count()==1){
+		lst.at(0)->setReadOnly(true);
+	}else{
+		//Need to be handled if more than one QLineEdit found
+	}
+	// const RefrWorker::SeriesData *dataToSave =
+	// auto dataToSave = m_charts->scatter3d->seriesList()[0]->dataProxy()->;
+	// auto dataToSave = m_charts->charts[0]->series().at(0);
+
+	// TODO: check data exist
+	if(objFlDlg.exec()){
+		qInfo() << "Export data to:" << objFlDlg.directory().absolutePath();
+		for (int i = 0; i < m_charts->TAB_MAX - 1; ++i)
+		{
+			auto dataToSave = m_charts->charts[i]->series().at(0);
+			QSplineSeries *series = qobject_cast<QSplineSeries *>(dataToSave);
+			if (!series)
+				continue;
+			QString filename = QString("%1/refr_data%2.txt").arg(objFlDlg.directory().absolutePath()).arg(i);
+
+			QFile file(filename);
+			file.open(QFile::ReadWrite);
+			foreach (const QPointF &point, series->points()) {
+				std::string line = QString::number(point.x()).toStdString() + " " + QString::number(point.y()).toStdString() + "\n";
+				file.write(line.c_str());
+			}
+			file.close();
+		}
+		QString filename = QString("%1/refr_data3d.txt").arg(objFlDlg.directory().absolutePath());
+
+		QFile file(filename);
+		file.open(QFile::ReadWrite);
+		auto dataToSave = m_charts->scatter3d->seriesList().at(0)->dataProxy()->array();
+		int pointCount = dataToSave->size();
+		for (int i = 0; i < pointCount; i++) {
+			QScatterDataItem dataItem = dataToSave->at(i);
+
+			std::string line = QString::number(dataItem.position().x()).toStdString() + " " + QString::number(dataItem.position().y()).toStdString() + " " + QString::number(dataItem.position().z()).toStdString() + "\n";
+			file.write(line.c_str());
+		}
+		file.close();
+	}
+}
 void MainWindow::updateProgress(int value)
 {
 	qInfo() << "Update progress:" << value;

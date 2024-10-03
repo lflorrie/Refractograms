@@ -27,18 +27,20 @@ public:
 private slots:
     void on_pushButton_clicked();
 	void on_actionSaveAll();
+	void on_actionExportData();
 	void updateProgress(int value);
 	void taskFinished();
 
 private:
 	RefrLogicData getValuesFromInput();
 private:
+
 	QProgressBar *progressBar;
 	QPropertyAnimation *animationProgressBar;
 	QGraphicsOpacityEffect *opacityEffect;
-	RefrCharts		*m_charts;
+
+	RefrCharts*		m_charts;
 	QFont			m_font;
-    Ui::MainWindow *ui;
-	QThread thread;
+	Ui::MainWindow* ui;
 };
 #endif // MAINWINDOW_H

@@ -13,8 +13,15 @@ public:
 	RefrCharts(const std::vector<QLayout *> layouts, QFont *font);
 
 	void initRefr1();
-	void plot2DPlotRefr1(const RefrLogicData &values);
 	void setAxis2D();
+	enum Plots {
+		PLOT_1,
+		PLOT_2,
+		PLOT_3_1,
+		PLOT_3_2,
+		PLOT_4,
+		ALL_PLOTS
+	};
 	enum {
 		TAB_1,
 		TAB_2,
@@ -22,6 +29,7 @@ public:
 		TAB_3_2,
 		TAB_MAX
 	};
+	void buildPlots(const RefrLogicData &values, RefrCharts::Plots);
 
 	struct RefrChartsTextLables{
 		QString title;
