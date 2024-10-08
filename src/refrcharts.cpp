@@ -21,6 +21,9 @@ void RefrCharts::initRefr1() {
 	{
 		charts[i] = new QChart;
 		chartViews[i] = new ChartView(charts[i]);
+
+		chartViews[i]->setMouseTracking(true);
+
 		chartViews[i]->setRubberBand(QChartView::RectangleRubberBand);
 		chartViews[i]->setRenderHint(QPainter::Antialiasing);
 		charts[i]->legend()->setAlignment(Qt::AlignBottom);
@@ -42,6 +45,7 @@ void RefrCharts::initRefr1() {
 
 	scatter3d->setAspectRatio(1.0); // TODO: make settings ?
 	scatter3d->setHorizontalAspectRatio(1.0);
+	// setAxis2D();
 }
 
 void RefrCharts::buildPlots(const RefrLogicData &values, RefrCharts::Plots p)

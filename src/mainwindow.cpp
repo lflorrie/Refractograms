@@ -67,80 +67,41 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_actionSaveAll()
 {
 	qInfo() << "Action SaveAll";
-	QFileDialog objFlDlg(this);
-	// objFlDlg.setOption(QFileDialog::ShowDirsOnly, true);
-	objFlDlg.setAcceptMode(QFileDialog::AcceptSave);
+	QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select the folder to save"));
 
-	QList<QLineEdit *> lst =objFlDlg.findChildren<QLineEdit *>();
-	qDebug() << lst.count();
-	if(lst.count()==1){
-		lst.at(0)->setReadOnly(true);
-	}else{
-		//Need to be handled if more than one QLineEdit found
-	}
-	if(objFlDlg.exec()){
-		qInfo() << "Save to:" << objFlDlg.directory().absolutePath();
+	if (!folderPath.isEmpty()) {
+		qInfo() << "Save all to:" << folderPath;
 		int currentTabIndex = ui->tabWidget->currentIndex();
+
 		for (int i = 0; i < m_charts->TAB_MAX; ++i)
 		{
-			int chartTabIndex = ui->tabWidget->indexOf(m_charts->chartViews[i]->parentWidget());
+			int		chartTabIndex = ui->tabWidget->indexOf(m_charts->chartViews[i]->parentWidget());
+			QString filename = QString("%1/test%2.png").arg(folderPath).arg(i);
+
 			ui->tabWidget->setCurrentIndex(chartTabIndex);
-
-			auto size = m_charts->charts[i]->size();
-			auto sizeV = m_charts->chartViews[i]->size();
-			m_charts->charts[i]->resize(1920, 1080);
-			m_charts->chartViews[i]->resize(1920, 1080);
-
-			QString filename = QString("%1/test%2.png").arg(objFlDlg.directory().absolutePath()).arg(i);
-			m_charts->chartViews[i]->grab({0, 0, 1920, 1080}).save(filename);
-
-			m_charts->charts[i]->resize(size);
-			m_charts->chartViews[i]->resize(sizeV);
-
+			m_charts->chartViews[i]->saveContent(filename);
 		}
-		m_charts->scatter3d->renderToImage(0,{1920, 1080}).save(QString("%1/test3d.png").arg(objFlDlg.directory().absolutePath()));
+		m_charts->scatter3d->renderToImage(0,{1920, 1080}).save(QString("%1/test3d.png").arg(folderPath));
 		ui->tabWidget->setCurrentIndex(currentTabIndex);
 	}
 }
+
 void MainWindow::on_actionExportData()
 {
 	qInfo() << "Action ExportData";
-	QFileDialog objFlDlg(this);
-	// objFlDlg.setOption(QFileDialog::ShowDirsOnly, true);
-	objFlDlg.setAcceptMode(QFileDialog::AcceptSave);
+	QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select the folder to save"));
 
-	QList<QLineEdit *> lst =objFlDlg.findChildren<QLineEdit *>();
-	qDebug() << lst.count();
-	if(lst.count()==1){
-		lst.at(0)->setReadOnly(true);
-	}else{
-		//Need to be handled if more than one QLineEdit found
-	}
-	// const RefrWorker::SeriesData *dataToSave =
-	// auto dataToSave = m_charts->scatter3d->seriesList()[0]->dataProxy()->;
-	// auto dataToSave = m_charts->charts[0]->series().at(0);
-
-	// TODO: check data exist
-	if(objFlDlg.exec()){
-		qInfo() << "Export data to:" << objFlDlg.directory().absolutePath();
-		for (int i = 0; i < m_charts->TAB_MAX - 1; ++i)
+	if(!folderPath.isEmpty()){
+		qInfo() << "Export all data to:" << folderPath;
+		for (int i = 0; i < m_charts->TAB_MAX; ++i)
 		{
-			auto dataToSave = m_charts->charts[i]->series().at(0);
-			QSplineSeries *series = qobject_cast<QSplineSeries *>(dataToSave);
-			if (!series)
-				continue;
-			QString filename = QString("%1/refr_data%2.txt").arg(objFlDlg.directory().absolutePath()).arg(i);
-
-			QFile file(filename);
-			file.open(QFile::ReadWrite);
-			foreach (const QPointF &point, series->points()) {
-				std::string line = QString::number(point.x()).toStdString() + " " + QString::number(point.y()).toStdString() + "\n";
-				file.write(line.c_str());
-			}
-			file.close();
+			QString filename = QString("%1/refr_data%2.txt").arg(folderPath).arg(i);
+			m_charts->chartViews[i]->exportContent(filename);
 		}
-		QString filename = QString("%1/refr_data3d.txt").arg(objFlDlg.directory().absolutePath());
+		QString filename = QString("%1/refr_data3d.txt").arg(folderPath);
 
+		if (m_charts->scatter3d->seriesList().empty())
+			return;
 		QFile file(filename);
 		file.open(QFile::ReadWrite);
 		auto dataToSave = m_charts->scatter3d->seriesList().at(0)->dataProxy()->array();
