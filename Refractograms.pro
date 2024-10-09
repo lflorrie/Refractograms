@@ -16,6 +16,7 @@ SOURCES += \
     src/refrcharts.cpp \
     src/refrlogic1.cpp \
     src/refrworker.cpp \
+    src/scatter3d.cpp \
     src/settings.cpp \
     src/settingschartview.cpp
 
@@ -26,6 +27,7 @@ HEADERS += \
     include/refrcharts.h \
     include/refrlogic1.h \
     include/refrworker.h \
+    include/scatter3d.h \
     include/settings.h \
     include/settingschartview.h
 

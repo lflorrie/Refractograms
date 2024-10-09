@@ -1,6 +1,8 @@
 #include "refrcharts.h"
 #include <QValueAxis>
 #include <QLayout>
+#include "chartview.h"
+
 RefrCharts::RefrCharts()
 {
 	initRefr1();
@@ -12,15 +14,16 @@ RefrCharts::RefrCharts(const std::vector<QLayout *> layouts, QFont *font)
 	m_font = *font;
 	initRefr1();
 	workerIsRunning = false;
-	std::cout << "RefrCharts thread id: " << std::this_thread::get_id() << std::endl;
-
 }
 
 void RefrCharts::initRefr1() {
 	for (int i = 0; i < TAB_MAX; ++i)
 	{
 		charts[i] = new QChart;
-		chartViews[i] = new QChartView(charts[i]);
+		chartViews[i] = new ChartView(charts[i]);
+
+		chartViews[i]->setMouseTracking(true);
+
 		chartViews[i]->setRubberBand(QChartView::RectangleRubberBand);
 		chartViews[i]->setRenderHint(QPainter::Antialiasing);
 		charts[i]->legend()->setAlignment(Qt::AlignBottom);
@@ -35,16 +38,17 @@ void RefrCharts::initRefr1() {
 		m_layouts[2]->addWidget(chartViews[TAB_3_2]);
 	}
 
-	scatter3d = new Q3DScatter;
+	scatter3d = new Scatter3D;
 	container = QWidget::createWindowContainer(scatter3d);
 	if (m_layouts.size() >= 4)
 		m_layouts[3]->layout()->addWidget(container);
 
 	scatter3d->setAspectRatio(1.0); // TODO: make settings ?
 	scatter3d->setHorizontalAspectRatio(1.0);
+	// setAxis2D();
 }
 
-void RefrCharts::plot2DPlotRefr1(const RefrLogicData &values)
+void RefrCharts::buildPlots(const RefrLogicData &values, RefrCharts::Plots p)
 {
 	if (workerIsRunning)
 	{
@@ -55,6 +59,7 @@ void RefrCharts::plot2DPlotRefr1(const RefrLogicData &values)
 	refrWorker = new RefrWorker;
 	thread = new QThread;
 	refrWorker->setValues(values);
+	// refrWorker->setPlot(p);
 	refrWorker->moveToThread(thread);
 	connect(thread, &QThread::started, refrWorker, &RefrWorker::process);
 	connect(refrWorker, &RefrWorker::finished, this, &RefrCharts::onWorkerFinished);
@@ -62,9 +67,14 @@ void RefrCharts::plot2DPlotRefr1(const RefrLogicData &values)
 	connect(thread, &QThread::finished, refrWorker, &QObject::deleteLater);
 	connect(thread, &QThread::finished, thread, &QObject::deleteLater);
 
+	connect(refrWorker, &RefrWorker::finished, this, &RefrCharts::finished);
+	connect(refrWorker, &RefrWorker::progressChanged, this, &RefrCharts::progressChanged);
+
+
 	qInfo() << "Worker start.";
 	thread->start();
 }
+
 void RefrCharts::setAxis2D() {
 	for (int i = 0; i < TAB_MAX; ++i)
 	{
@@ -82,16 +92,15 @@ void RefrCharts::setAxis2D() {
 
 void RefrCharts::onWorkerFinished()
 {
-	std::cout << "onWorkerFinished thread id: " << std::this_thread::get_id() << std::endl;
-
-	auto data = refrWorker->getData();
+	auto data     = refrWorker->getData();
+	auto refrData = refrWorker->getRefrData().getData();
 	// append data
 	std::vector<QSplineSeries *>splines[4];
-	for (int i = 0 ; i < 3; ++i)
+	for (int i = 0 ; i < TAB_MAX - 1; ++i)
 	{
 		splines[i].push_back(new QSplineSeries());
 	}
-	for (int i = 0 ; i < 3; ++i)
+	for (int i = 0 ; i < refrData.z_settings.count; ++i)
 	{
 		splines[TAB_3_2].push_back(new QSplineSeries());
 	}
@@ -101,25 +110,24 @@ void RefrCharts::onWorkerFinished()
 	for (auto &i : data->dataPlot[TAB_2]) {
 		splines[TAB_2].front()->append(i);
 	}
+
 	for (size_t zi = 0; zi < 1; ++zi) {
-		for (int i = 0; i < 100; ++i) { // TODO: const delete
+		for (int i = 0; i < refrData.z_settings.count_of_points; ++i) {
 			if (data->dataPlot[TAB_3_1][i].x() != data->dataPlot[TAB_3_1][i].x() ||
 				data->dataPlot[TAB_3_1][i].y() != data->dataPlot[TAB_3_1][i].y())
 				continue;
-			splines[RefrCharts::TAB_3_1][zi]->append(data->dataPlot[TAB_3_1][i + zi * 100]);
+			splines[RefrCharts::TAB_3_1][zi]->append(data->dataPlot[TAB_3_1][i + zi * refrData.z_settings.count_of_points]);
 		}
 	}
 
-	for (size_t zi = 0; zi < 3; ++zi) { // TODO: CONST DELETE
-		for (int i = 0; i < 100; ++i) {// TODO: const delete
+	for (int zi = 0; zi < refrData.z_settings.count; ++zi) {
+		for (int i = 0; i < refrData.z_settings.count_of_points; ++i) {
 			if (data->dataPlot[TAB_3_2][i].x() != data->dataPlot[TAB_3_2][i].x() ||
 				data->dataPlot[TAB_3_2][i].y() != data->dataPlot[TAB_3_2][i].y())
 				continue;
-			splines[RefrCharts::TAB_3_2][zi]->append(data->dataPlot[TAB_3_2][i + zi * 100]);
+			splines[RefrCharts::TAB_3_2][zi]->append(data->dataPlot[TAB_3_2][i + zi * refrData.z_settings.count_of_points]);
 		}
 	}
-
-
 
 	for (int i = 0; i < TAB_MAX; ++i)
 	{

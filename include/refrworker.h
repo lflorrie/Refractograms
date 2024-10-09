@@ -9,19 +9,21 @@ class RefrWorker : public QObject {
 	Q_OBJECT
 public:
 	RefrWorker();
-	struct SeriesData{
-		std::vector<QSplineSeries *>splines[4];
-		QScatter3DSeries *scatter3d;
-		std::vector<QPointF> dataPlot[4];
 
+	struct SeriesData {
+		QScatter3DSeries	 *scatter3d;
+		std::vector<QPointF> dataPlot[4];
 	};
 
-	void process();
-	SeriesData *getData();
-	void setValues(const RefrLogicData &values);
+	void		process();
+
+	SeriesData  *getData();
+
+	RefrLogic1	getRefrData() const;
+	void		setValues(const RefrLogicData &values);
 signals:
 	void finished();
-
+	void progressChanged(int value);
 private:
 	std::vector<QPointF> plot2Dfunc_refr(const std::vector<double> &z_array);
 private:

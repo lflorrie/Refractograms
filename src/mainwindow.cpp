@@ -13,7 +13,21 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 	m_font.setBold(1);
 	m_font.setPixelSize(20);
-	std::cout << "MainWindow thread id: " << std::this_thread::get_id() << std::endl;
+
+	progressBar = new QProgressBar();
+	progressBar->setRange(0, 100);
+	progressBar->setValue(0);
+	statusBar()->addPermanentWidget(progressBar);
+
+	// Эффект прозрачности
+	opacityEffect = new QGraphicsOpacityEffect(statusBar());
+	statusBar()->setGraphicsEffect(opacityEffect);
+
+	// Анимация для эффекта прозрачности
+	animationProgressBar = new QPropertyAnimation(opacityEffect, "opacity");
+	animationProgressBar->setDuration(1000);  // Продолжительность анимации 1 секунда
+	animationProgressBar->setStartValue(1.0);  // Начальная непрозрачность
+	animationProgressBar->setEndValue(0.0);    // Конечная непрозрачность
 
 	std::vector<QLayout *> layouts;
 	layouts.push_back(ui->tab->layout());
@@ -23,9 +37,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 	m_charts = new RefrCharts(layouts, &m_font);
 
-	// plot2DPlotRefr1();
 	qInfo() << "Main window created";
 	connect(ui->actionSave_all, &QAction::triggered, this, &MainWindow::on_actionSaveAll);
+	connect(ui->actionExport_data, &QAction::triggered, this, &MainWindow::on_actionExportData);
+
+	connect(m_charts, &RefrCharts::progressChanged, this, &MainWindow::updateProgress);
+	connect(m_charts, &RefrCharts::finished, this, &MainWindow::taskFinished);
 }
 
 MainWindow::~MainWindow()
@@ -37,46 +54,66 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
 	qInfo() << "Button clicked. Updating fields for func_t and func_n.";
-	m_charts->plot2DPlotRefr1(getValuesFromInput());
+	QString tab = ui->comboBox->currentText();
+	RefrCharts::Plots p;
+	if (tab == "All")
+		p = RefrCharts::ALL_PLOTS;
+	if (tab == "3.1")
+		p = RefrCharts::PLOT_3_1;
+
+	m_charts->buildPlots(getValuesFromInput(), p);
 }
 
 void MainWindow::on_actionSaveAll()
 {
 	qInfo() << "Action SaveAll";
-	QFileDialog objFlDlg(this);
-	// objFlDlg.setOption(QFileDialog::ShowDirsOnly, true);
-	objFlDlg.setAcceptMode(QFileDialog::AcceptSave);
+	QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select the folder to save"));
 
-	QList<QLineEdit *> lst =objFlDlg.findChildren<QLineEdit *>();
-	qDebug() << lst.count();
-	if(lst.count()==1){
-		lst.at(0)->setReadOnly(true);
-	}else{
-		//Need to be handled if more than one QLineEdit found
+	if (!folderPath.isEmpty()) {
+		qInfo() << "Save all to:" << folderPath;
+		int currentTabIndex = ui->tabWidget->currentIndex();
+
+		for (int i = 0; i < m_charts->TAB_MAX; ++i)
+		{
+			int		chartTabIndex = ui->tabWidget->indexOf(m_charts->chartViews[i]->parentWidget());
+			QString filename = QString("%1/test%2.png").arg(folderPath).arg(i);
+
+			ui->tabWidget->setCurrentIndex(chartTabIndex);
+			m_charts->chartViews[i]->saveContent(filename);
+		}
+		m_charts->scatter3d->saveContent(QString("%1/test3d.png").arg(folderPath));
+		ui->tabWidget->setCurrentIndex(currentTabIndex);
 	}
-	if(objFlDlg.exec()){
-		// qInfo() << "Save to:" << objFlDlg.directory().absolutePath();
-		// int currentTabIndex = ui->tabWidget->currentIndex();
-		// for (int i = 0; i < m_charts.TAB_MAX; ++i)
-		// {
-		// 	int chartTabIndex = ui->tabWidget->indexOf(m_charts.chartViews[i]->parentWidget());
-		// 	ui->tabWidget->setCurrentIndex(chartTabIndex);
+}
 
-		// 	auto size = m_charts.charts[i]->size();
-		// 	auto sizeV = m_charts.chartViews[i]->size();
-		// 	m_charts.charts[i]->resize(1920, 1080);
-		// 	m_charts.chartViews[i]->resize(1920, 1080);
+void MainWindow::on_actionExportData()
+{
+	qInfo() << "Action ExportData";
+	QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select the folder to save"));
 
-		// 	QString filename = QString("%1/test%2.png").arg(objFlDlg.directory().absolutePath()).arg(i);
-		// 	m_charts.chartViews[i]->grab({0, 0, 1920, 1080}).save(filename);
-
-		// 	m_charts.charts[i]->resize(size);
-		// 	m_charts.chartViews[i]->resize(sizeV);
-
-		// }
-		// m_charts.scatter3d->renderToImage(0,{1920, 1080}).save(QString("%1/test3d.png").arg(objFlDlg.directory().absolutePath()));
-		// ui->tabWidget->setCurrentIndex(currentTabIndex);
+	if(!folderPath.isEmpty()){
+		qInfo() << "Export all data to:" << folderPath;
+		for (int i = 0; i < m_charts->TAB_MAX; ++i)
+		{
+			QString filename = QString("%1/refr_data%2.txt").arg(folderPath).arg(i);
+			m_charts->chartViews[i]->exportContent(filename);
+		}
+		QString filename = QString("%1/refr_data3d.txt").arg(folderPath);
+		m_charts->scatter3d->exportContent(filename);
 	}
+}
+void MainWindow::updateProgress(int value)
+{
+	qInfo() << "Update progress:" << value;
+	progressBar->setValue(value);
+	opacityEffect->setOpacity(1);
+}
+
+void MainWindow::taskFinished()
+{
+	qInfo() << "Task Finished";
+	animationProgressBar->start();
+	// progressBar->setVisible(false);
 }
 
 RefrLogicData MainWindow::getValuesFromInput()
@@ -90,6 +127,12 @@ RefrLogicData MainWindow::getValuesFromInput()
 	data.T0		= ui->lineEdit_6->text().toDouble();
     data.deltaT = ui->lineEdit_7->text().toDouble();
 	data.x0		= ui->lineEdit_8->text().toDouble();
+
+	data.z_settings.count = ui->li_count_z->text().toInt();
+	data.z_settings.count_of_points = ui->li_count_points->text().toInt();
+	data.z_settings.current = ui->li_current_z->text().toDouble();
+	data.z_settings.start = ui->li_start->text().toDouble();
+	data.z_settings.step = ui->li_step->text().toDouble();
     return data;
 }
 
