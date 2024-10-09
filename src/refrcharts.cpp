@@ -38,7 +38,7 @@ void RefrCharts::initRefr1() {
 		m_layouts[2]->addWidget(chartViews[TAB_3_2]);
 	}
 
-	scatter3d = new Q3DScatter;
+	scatter3d = new Scatter3D;
 	container = QWidget::createWindowContainer(scatter3d);
 	if (m_layouts.size() >= 4)
 		m_layouts[3]->layout()->addWidget(container);

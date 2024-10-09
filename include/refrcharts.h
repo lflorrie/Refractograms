@@ -6,6 +6,7 @@
 #include <QSplineSeries>
 #include "refrworker.h"
 #include "chartview.h"
+#include "scatter3d.h"
 
 struct RefrCharts : public QObject {
 	Q_OBJECT
@@ -45,7 +46,7 @@ public:
 	};
 
 	QWidget			*container;
-	Q3DScatter		*scatter3d;
+	Scatter3D		*scatter3d;
 	QChart			*charts[TAB_MAX];
 	ChartView		*chartViews[TAB_MAX];
 	std::vector<QLayout *> m_layouts;

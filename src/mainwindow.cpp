@@ -81,7 +81,7 @@ void MainWindow::on_actionSaveAll()
 			ui->tabWidget->setCurrentIndex(chartTabIndex);
 			m_charts->chartViews[i]->saveContent(filename);
 		}
-		m_charts->scatter3d->renderToImage(0,{1920, 1080}).save(QString("%1/test3d.png").arg(folderPath));
+		m_charts->scatter3d->saveContent(QString("%1/test3d.png").arg(folderPath));
 		ui->tabWidget->setCurrentIndex(currentTabIndex);
 	}
 }
@@ -99,20 +99,7 @@ void MainWindow::on_actionExportData()
 			m_charts->chartViews[i]->exportContent(filename);
 		}
 		QString filename = QString("%1/refr_data3d.txt").arg(folderPath);
-
-		if (m_charts->scatter3d->seriesList().empty())
-			return;
-		QFile file(filename);
-		file.open(QFile::ReadWrite);
-		auto dataToSave = m_charts->scatter3d->seriesList().at(0)->dataProxy()->array();
-		int pointCount = dataToSave->size();
-		for (int i = 0; i < pointCount; i++) {
-			QScatterDataItem dataItem = dataToSave->at(i);
-
-			std::string line = QString::number(dataItem.position().x()).toStdString() + " " + QString::number(dataItem.position().y()).toStdString() + " " + QString::number(dataItem.position().z()).toStdString() + "\n";
-			file.write(line.c_str());
-		}
-		file.close();
+		m_charts->scatter3d->exportContent(filename);
 	}
 }
 void MainWindow::updateProgress(int value)
