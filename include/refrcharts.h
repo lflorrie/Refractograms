@@ -7,6 +7,7 @@
 #include "refrworker.h"
 #include "chartview.h"
 #include "scatter3d.h"
+#include "refrtypes.h"
 
 struct RefrCharts : public QObject {
 	Q_OBJECT
@@ -16,22 +17,7 @@ public:
 
 	void initRefr1();
 	void setAxis2D();
-	enum Plots {
-		PLOT_1,
-		PLOT_2,
-		PLOT_3_1,
-		PLOT_3_2,
-		PLOT_4,
-		ALL_PLOTS
-	};
-	enum {
-		TAB_1,
-		TAB_2,
-		TAB_3_1,
-		TAB_3_2,
-		TAB_MAX
-	};
-	void buildPlots(const RefrLogicData &values, RefrCharts::Plots);
+	void buildPlots(const RefrLogicData &values, Plots);
 
 	struct RefrChartsTextLables{
 		QString title;
@@ -55,8 +41,9 @@ public:
 	bool workerIsRunning;
 	QThread			*thread;
 	RefrWorker		*refrWorker;
+
 public slots:
-	void onWorkerFinished();
+	void onWorkerFinished(Plots type);
 signals:
 	void progressChanged(int value);
 	void finished();

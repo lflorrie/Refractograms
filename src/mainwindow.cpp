@@ -55,11 +55,11 @@ void MainWindow::on_pushButton_clicked()
 {
 	qInfo() << "Button clicked. Updating fields for func_t and func_n.";
 	QString tab = ui->comboBox->currentText();
-	RefrCharts::Plots p;
+	Plots p;
 	if (tab == "All")
-		p = RefrCharts::ALL_PLOTS;
+		p = ALL_PLOTS;
 	if (tab == "3.1")
-		p = RefrCharts::PLOT_3_1;
+		p = PLOT_3_1;
 
 	m_charts->buildPlots(getValuesFromInput(), p);
 }
@@ -73,7 +73,7 @@ void MainWindow::on_actionSaveAll()
 		qInfo() << "Save all to:" << folderPath;
 		int currentTabIndex = ui->tabWidget->currentIndex();
 
-		for (int i = 0; i < m_charts->TAB_MAX; ++i)
+		for (int i = 0; i < TAB_MAX; ++i)
 		{
 			int		chartTabIndex = ui->tabWidget->indexOf(m_charts->chartViews[i]->parentWidget());
 			QString filename = QString("%1/test%2.png").arg(folderPath).arg(i);
@@ -93,7 +93,7 @@ void MainWindow::on_actionExportData()
 
 	if(!folderPath.isEmpty()){
 		qInfo() << "Export all data to:" << folderPath;
-		for (int i = 0; i < m_charts->TAB_MAX; ++i)
+		for (int i = 0; i < TAB_MAX; ++i)
 		{
 			QString filename = QString("%1/refr_data%2.txt").arg(folderPath).arg(i);
 			m_charts->chartViews[i]->exportContent(filename);

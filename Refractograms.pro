@@ -28,6 +28,7 @@ HEADERS += \
     include/math_utils.h \
     include/refrcharts.h \
     include/refrlogic1.h \
+    include/refrtypes.h \
     include/refrworker.h \
     include/scatter3d.h \
     include/settings.h \

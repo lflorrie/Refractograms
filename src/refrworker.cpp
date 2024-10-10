@@ -7,64 +7,20 @@ RefrWorker::RefrWorker()
 
 void RefrWorker::process()
 {
-	emit progressChanged(0);
-	int		count_z = refr1.getData().z_settings.count;
-	double	R = refr1.getData().R;
-	int		count_of_points = refr1.getData().z_settings.count_of_points;
-	double  start = refr1.getData().z_settings.start;
-	double  step = refr1.getData().z_settings.step;
-
-	data.scatter3d = new QScatter3DSeries;
-	for (int i = 0; i < RefrCharts::TAB_MAX; ++i)
+	switch (typeOfCalculation)
 	{
-		data.dataPlot[i].clear();
+	case ALL_PLOTS:
+		qInfo("calculate all");
+		calculateAll();
+		break;
+	case PLOT_3_1:
+		qInfo("calculate 3_1");
+		calculate3_1();
+		break;
+	default:
+		break;
 	}
-
-	// calculation
-	qInfo() << "TAB1";
-	data.dataPlot[RefrCharts::TAB_1] = refr1.make2DPlot([&](double x) { return refr1.func_t(x);}, R, R + 10, count_of_points);
-	qInfo() << "TAB2";
-	data.dataPlot[RefrCharts::TAB_2] = refr1.make2DPlot([&](double x) { return refr1.func_n(x);} , R, R + 10, count_of_points);
-	qInfo() << "TAB3_1";
-	emit progressChanged(5);
-	data.dataPlot[RefrCharts::TAB_3_1] = plot2Dfunc_refr({refr1.getData().z_settings.current});
-	emit progressChanged(10);
-	qInfo() << "TAB3_2";
-	std::vector<double> z_array;
-	for (int i = 0; i < count_z; ++i)
-	{
-		z_array.push_back(start + i * step);
-	}
-	data.dataPlot[RefrCharts::TAB_3_2] = plot2Dfunc_refr(z_array);
-
-	// TAB 4
-	QScatterDataArray dataArray;
-	dataArray.reserve(count_of_points * count_z);
-
-	for (int i = 0; i < count_z; ++i)
-	{
-		for (int j = 0; j < count_of_points; ++j)
-		{
-			if (data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].x() != data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].x() ||
-				data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].y() != data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].y())
-				continue;
-			dataArray.append(QScatterDataItem({(float)(start + i * step) , (float)data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].y(), -(float)data.dataPlot[RefrCharts::TAB_3_2][j + i * count_of_points].x()}));
-		}
-	}
-
-	data.scatter3d->dataProxy()->addItems(dataArray);
-
-	// tab4 settings
-	data.scatter3d->setItemSize(0.1);
-	auto grad = QLinearGradient();
-	grad.setColorAt(0, Qt::red);
-	grad.setColorAt(1, Qt::blue);
-	data.scatter3d->setBaseGradient(grad);
-	data.scatter3d->setColorStyle(Q3DTheme::ColorStyleRangeGradient);
-	data.scatter3d->setMeshSmooth(1);
-
-	qInfo() << "process end";
-	emit finished();
+	emit finished(typeOfCalculation);
 }
 
 RefrWorker::SeriesData *RefrWorker::getData()
@@ -80,6 +36,11 @@ RefrLogic1 RefrWorker::getRefrData() const
 void RefrWorker::setValues(const RefrLogicData &values)
 {
 	refr1.setData(values);
+}
+
+void RefrWorker::setTypeOfCalculation(Plots p)
+{
+	this->typeOfCalculation = p;
 }
 
 struct thread_{
@@ -142,4 +103,71 @@ std::vector<QPointF> RefrWorker::plot2Dfunc_refr(const std::vector<double> &z_ar
 		}
 	}
 	return dataPlot3;
+}
+
+void RefrWorker::calculateAll()
+{
+	emit progressChanged(0);
+	int		count_z = refr1.getData().z_settings.count;
+	double	R = refr1.getData().R;
+	int		count_of_points = refr1.getData().z_settings.count_of_points;
+	double  start = refr1.getData().z_settings.start;
+	double  step = refr1.getData().z_settings.step;
+
+	data.scatter3d = new QScatter3DSeries; // memory leak ?
+	for (int i = 0; i < TAB_MAX; ++i)
+	{
+		data.dataPlot[i].clear();
+	}
+
+	// calculation
+	qInfo() << "TAB1";
+	data.dataPlot[TAB_1] = refr1.make2DPlot([&](double x) { return refr1.func_t(x);}, R, R + 10, count_of_points);
+	qInfo() << "TAB2";
+	data.dataPlot[TAB_2] = refr1.make2DPlot([&](double x) { return refr1.func_n(x);}, R, R + 10, count_of_points);
+	qInfo() << "TAB3_1";
+	emit progressChanged(5);
+	data.dataPlot[TAB_3_1] = plot2Dfunc_refr({refr1.getData().z_settings.current});
+	emit progressChanged(10);
+	qInfo() << "TAB3_2";
+	std::vector<double> z_array;
+	for (int i = 0; i < count_z; ++i)
+	{
+		z_array.push_back(start + i * step);
+	}
+	data.dataPlot[TAB_3_2] = plot2Dfunc_refr(z_array);
+
+	// TAB 4
+	QScatterDataArray dataArray;
+	dataArray.reserve(count_of_points * count_z);
+
+	for (int i = 0; i < count_z; ++i)
+	{
+		for (int j = 0; j < count_of_points; ++j)
+		{
+			if (data.dataPlot[TAB_3_2][j + i * count_of_points].x() != data.dataPlot[TAB_3_2][j + i * count_of_points].x() ||
+				data.dataPlot[TAB_3_2][j + i * count_of_points].y() != data.dataPlot[TAB_3_2][j + i * count_of_points].y())
+				continue;
+			dataArray.append(QScatterDataItem({(float)(start + i * step) , (float)data.dataPlot[TAB_3_2][j + i * count_of_points].y(), -(float)data.dataPlot[TAB_3_2][j + i * count_of_points].x()}));
+		}
+	}
+
+	data.scatter3d->dataProxy()->addItems(dataArray);
+
+	// tab4 settings
+	data.scatter3d->setItemSize(0.1);
+	auto grad = QLinearGradient();
+	grad.setColorAt(0, Qt::red);
+	grad.setColorAt(1, Qt::blue);
+	data.scatter3d->setBaseGradient(grad);
+	data.scatter3d->setColorStyle(Q3DTheme::ColorStyleRangeGradient);
+	data.scatter3d->setMeshSmooth(1);
+
+	qInfo() << "process end";
+}
+
+void RefrWorker::calculate3_1()
+{
+	data.dataPlot[TAB_3_1].clear();
+	data.dataPlot[TAB_3_1] = plot2Dfunc_refr({refr1.getData().z_settings.current});
 }
