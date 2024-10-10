@@ -12,6 +12,21 @@ ChartView::ChartView() {
 	// tooltip->setVisible(false); // По умолчанию подсказка скрыта
 }
 
+ChartView::ChartView(QChart *chart) : QChartView(chart) {
+	settingsDialogWindow = new SettingsChartView(this);
+	this->setMouseTracking(true);
+	this->setRenderHint(QPainter::Antialiasing);
+	// this->setRubberBand(QChartView::RectangleRubberBand);
+
+
+	m_coordX = new QGraphicsSimpleTextItem(this->chart());
+	m_coordX->setPos(this->chart()->size().width()/2 - 50, this->chart()->size().height());
+	m_coordX->setText("X: ");
+	m_coordY = new QGraphicsSimpleTextItem(this->chart());
+	m_coordY->setPos(this->chart()->size().width()/2 + 50, this->chart()->size().height());
+	m_coordY->setText("Y: ");
+}
+
 void ChartView::saveContent(const QString &path)
 {
 	if (path.isEmpty())
@@ -81,7 +96,7 @@ void ChartView::mousePressEvent(QMouseEvent *event)
 			QString fullPath = QFileDialog::getSaveFileName(this, tr("Export as..."), QString(),"*.txt");
 			exportContent(fullPath);
 		} else if (selectedAction == preferences) {
-			// settingsDialogWindow.open();
+			settingsDialogWindow->open();
 		}
 	}
 	QChartView::mousePressEvent(event);
@@ -90,20 +105,20 @@ void ChartView::mousePressEvent(QMouseEvent *event)
 void ChartView::mouseMoveEvent(QMouseEvent *event)
 {
 
-	QPointF pos = this->mapToScene(event->pos());
-	try {
-	// QValueAxis *axisX = static_cast<QValueAxis *>(this->chart()->axes().at(0));
-	// QValueAxis *axisY = static_cast<QValueAxis *>(this->chart()->axes(Qt::Vertical).at(0));
-		auto series = this->chart()->series();
-		if (series.isEmpty())
-			return;
-		auto val = this->chart()->mapToValue(pos, series.at(0));
+	// QPointF pos = this->mapToScene(event->pos());
+	// try {
+	// // QValueAxis *axisX = static_cast<QValueAxis *>(this->chart()->axes().at(0));
+	// // QValueAxis *axisY = static_cast<QValueAxis *>(this->chart()->axes(Qt::Vertical).at(0));
+	// 	auto series = this->chart()->series();
+	// 	if (series.isEmpty())
+	// 		return;
+	// 	auto val = this->chart()->mapToValue(pos, series.at(0));
 
-		qDebug() << event->type() <<  " X: " << val.x() << ", Y: " << val.y();
-	} catch (...)
-	{
-		return;
-	}
+	// 	qDebug() << event->type() <<  " X: " << val.x() << ", Y: " << val.y();
+	// } catch (...)
+	// {
+	// 	return;
+	// }
 
 	// if (!axisX || !axisY)
 	// return;
@@ -112,6 +127,8 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
 	// qreal xVal = pos.x();
 	// qreal yVal = pos.y();
 	// qDebug() << event->type() <<  " X: " << xVal << ", Y: " << yVal;
+	m_coordX->setText(QString("X: %1").arg(chart()->mapToValue(event->pos()).x()));
+	m_coordY->setText(QString("Y: %1").arg(chart()->mapToValue(event->pos()).y()));
 	QChartView::mouseMoveEvent(event);
 }
 
@@ -122,4 +139,67 @@ bool ChartView::event(QEvent *event)
 		// tooltip->setVisible(0);
 	}
 	return QChartView::event(event);
+}
+
+void ChartView::keepCallout()
+{
+	m_callouts.append(m_tooltip);
+	m_tooltip = new Callout(this->chart());
+}
+
+void ChartView::tooltip(QPointF point, bool state)
+{
+	if (m_tooltip == 0)
+		m_tooltip = new Callout(this->chart());
+
+	if (state) {
+		m_tooltip->setText(QString("X: %1 \nY: %2 ").arg(point.x()).arg(point.y()));
+		m_tooltip->setAnchor(point);
+		m_tooltip->setZValue(11);
+		m_tooltip->updateGeometry();
+		m_tooltip->show();
+	} else {
+		m_tooltip->hide();
+	}
+}
+
+
+void ChartView::resizeEvent(QResizeEvent *event)
+{
+	if (scene()) {
+		scene()->setSceneRect(QRect(QPoint(0, 0), event->size()));
+		this->chart()->resize(event->size());
+		m_coordX->setPos(this->chart()->size().width()/2 - 50, this->chart()->size().height() - 20);
+		m_coordY->setPos(this->chart()->size().width()/2 + 50, this->chart()->size().height() - 20);
+		const auto callouts = m_callouts;
+		for (Callout *callout : callouts)
+			callout->updateGeometry();
+	}
+	QGraphicsView::resizeEvent(event);
+}
+
+
+void ChartView::wheelEvent(QWheelEvent *event)
+{
+	// QPoint numPixels = event->pixelDelta();
+	QPoint numDegrees = event->angleDelta() / 8;
+
+	// if (!numPixels.isNull()) {
+		// qDebug() << "numPix:" << numPixels;
+	// }
+	if (!numDegrees.isNull()) {
+		QPoint numSteps = numDegrees / 15;
+		// qDebug() << "numDegr:" << numDegrees;
+		if (numSteps.y() > 0) {
+			// this->chart()->zoomIn();
+			this->chart()->zoom(1.1);
+			// this->chart()->zoomIn({event->position().x(), event->position().y(),});
+		}
+		else {
+			this->chart()->zoom(0.9);
+				// this->chart()->zoomOut();
+		}
+	}
+
+	event->accept();
 }

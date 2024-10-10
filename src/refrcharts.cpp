@@ -22,10 +22,6 @@ void RefrCharts::initRefr1() {
 		charts[i] = new QChart;
 		chartViews[i] = new ChartView(charts[i]);
 
-		chartViews[i]->setMouseTracking(true);
-
-		chartViews[i]->setRubberBand(QChartView::RectangleRubberBand);
-		chartViews[i]->setRenderHint(QPainter::Antialiasing);
 		charts[i]->legend()->setAlignment(Qt::AlignBottom);
 		charts[i]->setTitleFont(m_font);
 		charts[i]->setTitle(labels[i].title);
@@ -85,6 +81,7 @@ void RefrCharts::setAxis2D() {
 		// axisX->setTickInterval(0.5); // TODO: add to settings
 		axisX->setLabelsEditable(1);
 		axisX->setLabelsVisible(1);
+
 		axisX->setTitleText(labels[i].axisXTitle);
 		axisY->setTitleText(labels[i].axisYTitle);
 	}
@@ -133,7 +130,11 @@ void RefrCharts::onWorkerFinished()
 	{
 		charts[i]->removeAllSeries();
 		for (auto &spline : splines[i])
+		{
 			charts[i]->addSeries(spline);
+			connect(spline, &QSplineSeries::clicked, chartViews[i], &ChartView::keepCallout);
+			connect(spline, &QSplineSeries::hovered, chartViews[i], &ChartView::tooltip);
+		}
 	}
 
 	if (!scatter3d->seriesList().empty())

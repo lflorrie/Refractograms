@@ -9,6 +9,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/callout.cpp \
     src/chartview.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
     src/settingschartview.cpp
 
 HEADERS += \
+    include/callout.h \
     include/chartview.h \
     include/mainwindow.h \
     include/math_utils.h \
@@ -32,7 +34,8 @@ HEADERS += \
     include/settingschartview.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    settingschartview.ui
 
 TRANSLATIONS += \
     Refractograms_ru_RU.ts
