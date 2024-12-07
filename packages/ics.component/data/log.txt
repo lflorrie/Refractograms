@@ -1,0 +1,55 @@
+[11.10.2024 03:13:06.168 INFO] unknown:0 - 
+
+Application "Refractograms" started.
+[11.10.2024 03:13:06.437 INFO] unknown:0 - Main window created
+[11.10.2024 03:13:09.753 INFO] unknown:0 - Main window deleted
+[11.10.2024 03:13:12.486 INFO] unknown:0 - 
+
+Application "Refractograms" started.
+[11.10.2024 03:13:13.058 INFO] unknown:0 - Main window created
+[11.10.2024 03:13:13.623 DEBUG] unknown:0 - MOUSE LEAVE
+[11.10.2024 03:13:14.001 DEBUG] unknown:0 - MOUSE LEAVE
+[11.10.2024 03:13:14.372 INFO] unknown:0 - Main window deleted
+[11.10.2024 03:15:07.236 INFO] unknown:0 - 
+
+Application "Refractograms" started.
+[11.10.2024 03:15:07.501 INFO] unknown:0 - Main window created
+[11.10.2024 03:15:11.023 DEBUG] unknown:0 - MOUSE LEAVE
+[11.10.2024 03:15:11.795 INFO] unknown:0 - Main window deleted
+[07.12.2024 13:15:44.430 INFO] unknown:0 - 
+
+Application "Refractograms" started.
+[07.12.2024 13:15:44.779 INFO] unknown:0 - Main window created
+[07.12.2024 13:16:00.950 DEBUG] unknown:0 - MOUSE LEAVE
+[07.12.2024 13:16:01.073 DEBUG] unknown:0 - MOUSE LEAVE
+[07.12.2024 13:16:03.358 DEBUG] unknown:0 - MOUSE LEAVE
+[07.12.2024 13:16:03.690 DEBUG] unknown:0 - MOUSE LEAVE
+[07.12.2024 13:16:04.301 DEBUG] unknown:0 - MOUSE LEAVE
+[07.12.2024 13:16:04.657 INFO] unknown:0 - Button clicked. Updating fields for func_t and func_n.
+[07.12.2024 13:16:04.657 DEBUG] unknown:0 - RefrLogic1 created
+[07.12.2024 13:16:04.657 INFO] unknown:0 - Worker start.
+[07.12.2024 13:16:04.658 INFO] unknown:0 - calculate all
+[07.12.2024 13:16:04.658 INFO] unknown:0 - Update progress: 0
+[07.12.2024 13:16:04.658 INFO] unknown:0 - TAB1
+[07.12.2024 13:16:04.658 INFO] unknown:0 - TAB2
+[07.12.2024 13:16:04.658 INFO] unknown:0 - TAB3_1
+[07.12.2024 13:16:04.658 INFO] unknown:0 - Count of threads:  16
+[07.12.2024 13:16:04.658 INFO] unknown:0 - Update progress: 5
+[07.12.2024 13:16:05.142 INFO] unknown:0 - Update progress: 100
+[07.12.2024 13:16:05.670 INFO] unknown:0 - TAB3_2
+[07.12.2024 13:16:05.670 INFO] unknown:0 - Update progress: 10
+[07.12.2024 13:16:05.675 INFO] unknown:0 - Count of threads:  16
+[07.12.2024 13:16:06.159 INFO] unknown:0 - Update progress: 40
+[07.12.2024 13:16:06.694 INFO] unknown:0 - Update progress: 70
+[07.12.2024 13:16:07.189 INFO] unknown:0 - Update progress: 100
+[07.12.2024 13:16:07.246 INFO] unknown:0 - process end
+[07.12.2024 13:16:07.248 WARN] unknown:0 - QObject::setParent: Cannot set parent, new parent is in a different thread
+[07.12.2024 13:16:07.249 INFO] unknown:0 - Task Finished
+[07.12.2024 13:16:07.476 DEBUG] unknown:0 - MOUSE LEAVE
+[07.12.2024 13:16:08.289 DEBUG] unknown:0 - MOUSE LEAVE
+[07.12.2024 13:16:08.821 DEBUG] unknown:0 - MOUSE LEAVE
+[07.12.2024 13:16:11.517 DEBUG] unknown:0 - MOUSE LEAVE
+[07.12.2024 13:16:13.405 DEBUG] unknown:0 - Scatter3D: MousePressEvent
+[07.12.2024 13:16:13.810 DEBUG] unknown:0 - Scatter3D: MousePressEvent
+[07.12.2024 13:16:14.170 DEBUG] unknown:0 - Scatter3D: MousePressEvent
+[07.12.2024 13:16:22.559 INFO] unknown:0 - Main window deleted

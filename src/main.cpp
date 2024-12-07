@@ -11,7 +11,7 @@ QtMessageHandler originalHandler = nullptr;
 void logToFile(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
 	QString message = qFormatLogMessage(type, context, msg);
-	static FILE *f = fopen("log.txt", "a");
+	static FILE *f = fopen("log.txt", "w");
 	fprintf(f, "%s\n", qPrintable(message));
 	fflush(f);
 

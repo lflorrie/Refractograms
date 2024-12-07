@@ -22,10 +22,6 @@ void RefrCharts::initRefr1() {
 		charts[i] = new QChart;
 		chartViews[i] = new ChartView(charts[i]);
 
-		chartViews[i]->setMouseTracking(true);
-
-		chartViews[i]->setRubberBand(QChartView::RectangleRubberBand);
-		chartViews[i]->setRenderHint(QPainter::Antialiasing);
 		charts[i]->legend()->setAlignment(Qt::AlignBottom);
 		charts[i]->setTitleFont(m_font);
 		charts[i]->setTitle(labels[i].title);
@@ -48,7 +44,7 @@ void RefrCharts::initRefr1() {
 	// setAxis2D();
 }
 
-void RefrCharts::buildPlots(const RefrLogicData &values, RefrCharts::Plots p)
+void RefrCharts::buildPlots(const RefrLogicData &values, Plots p)
 {
 	if (workerIsRunning)
 	{
@@ -59,7 +55,7 @@ void RefrCharts::buildPlots(const RefrLogicData &values, RefrCharts::Plots p)
 	refrWorker = new RefrWorker;
 	thread = new QThread;
 	refrWorker->setValues(values);
-	// refrWorker->setPlot(p);
+	refrWorker->setTypeOfCalculation(p);
 	refrWorker->moveToThread(thread);
 	connect(thread, &QThread::started, refrWorker, &RefrWorker::process);
 	connect(refrWorker, &RefrWorker::finished, this, &RefrCharts::onWorkerFinished);
@@ -76,26 +72,54 @@ void RefrCharts::buildPlots(const RefrLogicData &values, RefrCharts::Plots p)
 }
 
 void RefrCharts::setAxis2D() {
+	QValueAxis *axisX;
+	QValueAxis *axisY;
+
 	for (int i = 0; i < TAB_MAX; ++i)
 	{
 		charts[i]->createDefaultAxes();
-		QValueAxis *axisX = static_cast<QValueAxis *>(charts[i]->axes().at(0));
-		QValueAxis *axisY = static_cast<QValueAxis *>(charts[i]->axes(Qt::Vertical).at(0));
+		if (charts[i]->axes().isEmpty())
+			continue;
+		axisX = static_cast<QValueAxis *>(charts[i]->axes().at(0));
+		axisY = static_cast<QValueAxis *>(charts[i]->axes(Qt::Vertical).at(0));
 		// axisX->setTickType(QValueAxis::TicksDynamic); // TODO: add to settings
 		// axisX->setTickInterval(0.5); // TODO: add to settings
 		axisX->setLabelsEditable(1);
 		axisX->setLabelsVisible(1);
+
 		axisX->setTitleText(labels[i].axisXTitle);
 		axisY->setTitleText(labels[i].axisYTitle);
 	}
 }
-
-void RefrCharts::onWorkerFinished()
+// TODO: refactoring this function
+void RefrCharts::onWorkerFinished(Plots type)
 {
 	auto data     = refrWorker->getData();
 	auto refrData = refrWorker->getRefrData().getData();
 	// append data
 	std::vector<QSplineSeries *>splines[4];
+	if (type == PLOT_3_1)
+	{
+		splines[TAB_3_1].push_back(new QSplineSeries());
+		charts[TAB_3_1]->removeAllSeries();
+		for (size_t zi = 0; zi < 1; ++zi) {
+			for (int i = 0; i < refrData.z_settings.count_of_points; ++i) {
+				if (data->dataPlot[TAB_3_1][i].x() != data->dataPlot[TAB_3_1][i].x() ||
+					data->dataPlot[TAB_3_1][i].y() != data->dataPlot[TAB_3_1][i].y())
+					continue;
+				splines[TAB_3_1][zi]->append(data->dataPlot[TAB_3_1][i + zi * refrData.z_settings.count_of_points]);
+			}
+		}
+		for (auto &spline : splines[TAB_3_1])
+		{
+			charts[TAB_3_1]->addSeries(spline);
+			connect(spline, &QSplineSeries::clicked, chartViews[TAB_3_1], &ChartView::keepCallout);
+			connect(spline, &QSplineSeries::hovered, chartViews[TAB_3_1], &ChartView::tooltip);
+		}
+		setAxis2D();
+		workerIsRunning = false;
+		return;
+	}
 	for (int i = 0 ; i < TAB_MAX - 1; ++i)
 	{
 		splines[i].push_back(new QSplineSeries());
@@ -116,7 +140,7 @@ void RefrCharts::onWorkerFinished()
 			if (data->dataPlot[TAB_3_1][i].x() != data->dataPlot[TAB_3_1][i].x() ||
 				data->dataPlot[TAB_3_1][i].y() != data->dataPlot[TAB_3_1][i].y())
 				continue;
-			splines[RefrCharts::TAB_3_1][zi]->append(data->dataPlot[TAB_3_1][i + zi * refrData.z_settings.count_of_points]);
+			splines[TAB_3_1][zi]->append(data->dataPlot[TAB_3_1][i + zi * refrData.z_settings.count_of_points]);
 		}
 	}
 
@@ -125,7 +149,7 @@ void RefrCharts::onWorkerFinished()
 			if (data->dataPlot[TAB_3_2][i].x() != data->dataPlot[TAB_3_2][i].x() ||
 				data->dataPlot[TAB_3_2][i].y() != data->dataPlot[TAB_3_2][i].y())
 				continue;
-			splines[RefrCharts::TAB_3_2][zi]->append(data->dataPlot[TAB_3_2][i + zi * refrData.z_settings.count_of_points]);
+			splines[TAB_3_2][zi]->append(data->dataPlot[TAB_3_2][i + zi * refrData.z_settings.count_of_points]);
 		}
 	}
 
@@ -133,7 +157,11 @@ void RefrCharts::onWorkerFinished()
 	{
 		charts[i]->removeAllSeries();
 		for (auto &spline : splines[i])
+		{
 			charts[i]->addSeries(spline);
+			connect(spline, &QSplineSeries::clicked, chartViews[i], &ChartView::keepCallout);
+			connect(spline, &QSplineSeries::hovered, chartViews[i], &ChartView::tooltip);
+		}
 	}
 
 	if (!scatter3d->seriesList().empty())

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>Refractograms</DisplayName>
+    <Description>Program for calculation refractograms</Description>
+    <Version>0.0.1</Version>
+    <ReleaseDate>2024-10-11</ReleaseDate>
+    <Default>true</Default>
+    <Script>installscript.qs</Script>
+</Package>

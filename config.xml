@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Refractograms Installer</Name>
+    <Version>0.0.1</Version>
+    <Title>Refractograms</Title>
+    <Publisher>lflorrie</Publisher>
+    <StartMenuDir>Refractograms</StartMenuDir>
+    <TargetDir>@HomeDir@/Refractograms</TargetDir>
+</Installer>
