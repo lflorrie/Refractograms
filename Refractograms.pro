@@ -8,6 +8,8 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH += C:/Programs2/Boost/
+
 SOURCES += \
     src/callout.cpp \
     src/chartview.cpp \
@@ -47,3 +49,23 @@ INCLUDEPATH += include
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+
+# deploy
+QT_INSTALL_FRAMEWORK_PATH = C:/Qt/Tools/QtInstallerFramework/4.8
+
+DESTDIR = $$PWD/../Refractograms/packages/ics.component/data
+
+INPUT = $$PWD/config/config.xml $$PWD/packages
+INSTALLER = refractograms-installer
+refractograms-installer.input = INPUT
+refractograms-installer.output = $$INSTALLER
+refractograms-installer.CONFIG += target_predeps no_link combine
+refractograms-installer.commands = $$QT_INSTALL_FRAMEWORK_PATH/bin/binarycreator --offline-only -c $$PWD/config/config.xml -p $$PWD/packages ../Refractograms-Installer/${QMAKE_FILE_OUT}
+QMAKE_EXTRA_COMPILERS += refractograms-installer
+
+DESTDIR = $$PWD/../Refractograms/packages/ics.component/data
+create_package.commands = $$quote(windeployqt --qmldir $$PWD/../Refractograms-Installer $${DESTDIR})
+QMAKE_EXTRA_TARGETS += create_package
+PRE_TARGETDEPS += create_package
+

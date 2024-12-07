@@ -10,6 +10,7 @@ ChartView::ChartView() {
 	// // tooltip->setPos(10, 10);
 	// tooltip->setZValue(11); // Устанавливаем z-индекс, чтобы подсказка была поверх графика
 	// tooltip->setVisible(false); // По умолчанию подсказка скрыта
+    m_tooltip = 0;
 }
 
 ChartView::ChartView(QChart *chart) : QChartView(chart) {
@@ -25,6 +26,7 @@ ChartView::ChartView(QChart *chart) : QChartView(chart) {
 	m_coordY = new QGraphicsSimpleTextItem(this->chart());
 	m_coordY->setPos(this->chart()->size().width()/2 + 50, this->chart()->size().height());
 	m_coordY->setText("Y: ");
+    m_tooltip = 0;
 }
 
 void ChartView::saveContent(const QString &path)

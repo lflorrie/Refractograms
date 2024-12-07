@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 	m_font.setBold(1);
 	m_font.setPixelSize(20);
-
+    setWindowTitle("Refracrograms");
 	progressBar = new QProgressBar();
 	progressBar->setRange(0, 100);
 	progressBar->setValue(0);

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+<Name>Refractograms</Name>
+<Version>0.0.1</Version>
+<Title>Refractograms</Title>
+<Publisher>lflorrie</Publisher>
+<WizardStyle>Aero</WizardStyle>
+<!-- Directory name is used in package.xml -->
+<StartMenuDir>Refractograms</StartMenuDir>
+<TargetDir>@HomeDir@/Refractograms</TargetDir>
+</Installer>
