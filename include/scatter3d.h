@@ -9,7 +9,6 @@ public:
 	Scatter3D();
 	void saveContent(const QString &full_path);
 	void exportContent(const QString &full_path);
-	// QWindow interface
 protected:
 	virtual void mousePressEvent(QMouseEvent *) override;
 };

@@ -89,6 +89,16 @@ void RefrCharts::setAxis2D() {
 
 		axisX->setTitleText(labels[i].axisXTitle);
 		axisY->setTitleText(labels[i].axisYTitle);
+
+        // TODO: Make setPlotSettings and apply this after.
+        PlotSettings p;
+        p.grid.maxX = axisX->max();
+        p.grid.minX = axisX->min();
+        p.grid.maxY = axisY->max();
+        p.grid.minY = axisY->min();
+        p.grid.ticksX = axisX->tickCount();
+        p.grid.ticksY = axisY->tickCount();
+        chartViews[i]->settings().setPlotSettings(p);
 	}
 }
 // TODO: refactoring this function

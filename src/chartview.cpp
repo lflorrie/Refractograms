@@ -27,6 +27,7 @@ ChartView::ChartView(QChart *chart) : QChartView(chart) {
 	m_coordY->setPos(this->chart()->size().width()/2 + 50, this->chart()->size().height());
 	m_coordY->setText("Y: ");
     m_tooltip = 0;
+    connect(this->settingsDialogWindow, &SettingsChartView::settingsUpdated, this, &ChartView::onSettingsUpdated);
 }
 
 void ChartView::saveContent(const QString &path)
@@ -85,20 +86,22 @@ void ChartView::mousePressEvent(QMouseEvent *event)
 
 	if (event->button() == Qt::MiddleButton) {
 		QMenu menu;
-		QAction* save = menu.addAction("Save");
-		QAction* save_data = menu.addAction("Save data");
-		QAction* preferences = menu.addAction("Preferences");
+        QAction* save = menu.addAction("Сохранить изображение");
+        QAction* save_data = menu.addAction("Экспортировать данные");
+        QAction* preferences = menu.addAction("Настройки");
 
-		QAction* selectedAction = menu.exec(event->globalPos());
+        QAction* selectedAction = menu.exec(event->globalPos());
 
 		if (selectedAction == save) {
-			QString fullPath = QFileDialog::getSaveFileName(this, tr("Save as..."), QString(),"*.png");
+            QString fullPath = QFileDialog::getSaveFileName(this, tr("Сохранить как..."), QString(),"*.png");
 			saveContent(fullPath);
 		} else if (selectedAction == save_data) {
-			QString fullPath = QFileDialog::getSaveFileName(this, tr("Export as..."), QString(),"*.txt");
+            QString fullPath = QFileDialog::getSaveFileName(this, tr("Экспортировать как..."), QString(),"*.txt");
 			exportContent(fullPath);
-		} else if (selectedAction == preferences) {
-			settingsDialogWindow->open();
+        } else if (selectedAction == preferences) {
+
+            settingsDialogWindow->updateSettings(this->m_settings.getPlotSettings());
+            settingsDialogWindow->open();
 		}
 	}
 	QChartView::mousePressEvent(event);
@@ -137,7 +140,7 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
 bool ChartView::event(QEvent *event)
 {
 	if (event->type() == QEvent::Leave) {
-		qDebug() << "MOUSE LEAVE";
+        // qDebug() << "MOUSE LEAVE";
 		// tooltip->setVisible(0);
 	}
 	return QChartView::event(event);
@@ -161,8 +164,36 @@ void ChartView::tooltip(QPointF point, bool state)
 		m_tooltip->updateGeometry();
 		m_tooltip->show();
 	} else {
-		m_tooltip->hide();
-	}
+        m_tooltip->hide();
+    }
+}
+
+void ChartView::onSettingsUpdated(PlotSettings &p)
+{
+    QValueAxis *axisX;
+    QValueAxis *axisY;
+
+//    this->chart()->createDefaultAxes();
+    if (this->chart()->axes().isEmpty())
+        return;
+    axisX = static_cast<QValueAxis *>(this->chart()->axes().at(0));
+    axisY = static_cast<QValueAxis *>(this->chart()->axes(Qt::Vertical).at(0));
+    axisX->setRange(p.grid.minX, p.grid.maxX);
+    axisY->setRange(p.grid.minY, p.grid.maxY);
+    axisX->setTickCount(p.grid.ticksX);
+    axisY->setTickCount(p.grid.ticksY);
+
+    axisX->setLabelsEditable(1);
+    axisX->setLabelsVisible(1);
+
+    axisY->setLabelsEditable(1);
+    axisY->setLabelsVisible(1);
+
+    this->settings().setPlotSettings(p);
+//    axisX->setMin(p.grid.minX);
+//    axisX->setMax(p.grid.maxX);
+//    axisY->setMin(p.grid.minY);
+//    axisY->setMax(p.grid.maxY);
 }
 
 

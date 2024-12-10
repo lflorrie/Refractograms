@@ -38,18 +38,18 @@ void Scatter3D::mousePressEvent(QMouseEvent *event)
 {
 	qDebug() << "Scatter3D: MousePressEvent";
 	if (event->button() == Qt::MiddleButton) {
-		QMenu menu;
-		QAction* save = menu.addAction("Save");
-		QAction* save_data = menu.addAction("Save data");
-		QAction* preferences = menu.addAction("Preferences");
+        QMenu menu;
+        QAction* save = menu.addAction(tr("Сохранить изображение"));
+        QAction* save_data = menu.addAction(tr("Экспортировать данные"));
+        QAction* preferences = menu.addAction(tr("Настройки"));
 
 		QAction* selectedAction = menu.exec(event->globalPos());
 		// TODO: QScatter3D is not a widget, but getSaveFileName need widget parent
 		if (selectedAction == save) {
-			QString fullPath = QFileDialog::getSaveFileName(nullptr, tr("Save as..."), QString(),"*.png");
+            QString fullPath = QFileDialog::getSaveFileName(nullptr, tr("Сохранить как..."), QString(),"*.png");
 			saveContent(fullPath);
 		} else if (selectedAction == save_data) {
-			QString fullPath = QFileDialog::getSaveFileName(nullptr, tr("Export as..."), QString(),"*.txt");
+            QString fullPath = QFileDialog::getSaveFileName(nullptr, tr("Экспортировать как..."), QString(),"*.txt");
 			exportContent(fullPath);
 		} else if (selectedAction == preferences) {
 			// settingsDialogWindow.open();

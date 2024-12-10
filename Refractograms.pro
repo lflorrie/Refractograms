@@ -42,6 +42,11 @@ FORMS += \
 
 TRANSLATIONS += \
     Refractograms_ru_RU.ts
+
+RESOURCES += \
+        resources.qrc
+
+
 CONFIG += lrelease
 CONFIG += embed_translations
 INCLUDEPATH += include
@@ -49,7 +54,6 @@ INCLUDEPATH += include
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
 
 # deploy
 QT_INSTALL_FRAMEWORK_PATH = C:/Qt/Tools/QtInstallerFramework/4.8
@@ -68,4 +72,5 @@ DESTDIR = $$PWD/../Refractograms/packages/ics.component/data
 create_package.commands = $$quote(windeployqt --qmldir $$PWD/../Refractograms-Installer $${DESTDIR})
 QMAKE_EXTRA_TARGETS += create_package
 PRE_TARGETDEPS += create_package
+
 

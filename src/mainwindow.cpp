@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QValueAxis>
 #include <QFileDialog>
+#include <QIcon>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,7 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 	m_font.setBold(1);
 	m_font.setPixelSize(20);
-    setWindowTitle("Refracrograms");
+    setWindowTitle(tr("Рефрактограммы"));
+    setWindowIcon(QIcon(":icons/resources/logo.png"));
 	progressBar = new QProgressBar();
 	progressBar->setRange(0, 100);
 	progressBar->setValue(0);
@@ -54,20 +56,26 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
 	qInfo() << "Button clicked. Updating fields for func_t and func_n.";
-	QString tab = ui->comboBox->currentText();
-	Plots p;
-	if (tab == "All")
-		p = ALL_PLOTS;
-	if (tab == "3.1")
-		p = PLOT_3_1;
-
+    Plots p;
+    switch (ui->comboBox->currentIndex())
+    {
+    case 0:
+        p = ALL_PLOTS;
+        break;
+    case 1:
+        p = PLOT_3_1;
+        break;
+    default:
+        qCritical() << "Combobox index is wrong";
+        p = ALL_PLOTS;
+    };
 	m_charts->buildPlots(getValuesFromInput(), p);
 }
 
 void MainWindow::on_actionSaveAll()
 {
 	qInfo() << "Action SaveAll";
-	QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select the folder to save"));
+    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Выбрать директорию для сохранения"));
 
 	if (!folderPath.isEmpty()) {
 		qInfo() << "Save all to:" << folderPath;
@@ -89,7 +97,7 @@ void MainWindow::on_actionSaveAll()
 void MainWindow::on_actionExportData()
 {
 	qInfo() << "Action ExportData";
-	QString folderPath = QFileDialog::getExistingDirectory(this, tr("Select the folder to save"));
+    QString folderPath = QFileDialog::getExistingDirectory(this, tr("Выбрать директорию для экспорта данных"));
 
 	if(!folderPath.isEmpty()){
 		qInfo() << "Export all data to:" << folderPath;

@@ -2,6 +2,7 @@
 #define SETTINGSCHARTVIEW_H
 
 #include <QDialog>
+#include "settings.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class SettingsChartView; }
@@ -13,6 +14,15 @@ class SettingsChartView : public QDialog
 public:
 	// SettingsChartView();
 	SettingsChartView(QWidget *parent = nullptr);
+    void updateSettings(const PlotSettings &s);
+signals:
+    void settingsUpdated(PlotSettings &s);
+private slots:
+    void on_cancelButton_clicked();
+
+    void on_saveButton_clicked();
+    void on_applyButton_clicked();
+
 private:
 	Ui::SettingsChartView* ui;
 };
