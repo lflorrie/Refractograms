@@ -476,9 +476,18 @@
   <tabstop>lineEdit</tabstop>
   <tabstop>lineEdit_2</tabstop>
   <tabstop>lineEdit_4</tabstop>
+  <tabstop>li_current_z</tabstop>
   <tabstop>lineEdit_6</tabstop>
   <tabstop>lineEdit_7</tabstop>
+  <tabstop>lineEdit_8</tabstop>
+  <tabstop>lineEdit_3</tabstop>
+  <tabstop>li_count_z</tabstop>
+  <tabstop>li_count_points</tabstop>
+  <tabstop>li_start</tabstop>
+  <tabstop>li_step</tabstop>
+  <tabstop>comboBox</tabstop>
   <tabstop>pushButton</tabstop>
+  <tabstop>scrollArea</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>

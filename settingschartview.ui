@@ -156,6 +156,18 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>le_minX</tabstop>
+  <tabstop>le_maxX</tabstop>
+  <tabstop>le_ticksX</tabstop>
+  <tabstop>le_minY</tabstop>
+  <tabstop>le_maxY</tabstop>
+  <tabstop>le_ticksY</tabstop>
+  <tabstop>saveButton</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>applyButton</tabstop>
+  <tabstop>scrollArea</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
