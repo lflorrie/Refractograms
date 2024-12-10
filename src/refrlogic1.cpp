@@ -11,7 +11,6 @@ void RefrLogic1::initTestData() {
 	data.a = 3.680;
 	data.z0 = 300;
 	data.deltaR = -1.669;
-	data.z1 = 440;
 	data.T0 = 180;
 	data.deltaT = -150;
 	data.x0 = 20;
@@ -178,38 +177,6 @@ std::vector<QPointF> RefrLogic1::make2DPlot(std::function<double (double)> func,
 	return res;
 }
 
-void RefrLogic1::calculate() {
-	testFunc();
-	auto startTime = std::chrono::steady_clock::now();
-
-
-	//        fi = np.linspace(-math.pi/4, math.pi/4, 100)
-	//        x = [func_x(i, 25.5, 40) for i in fi]
-	//        y = [func_y(i, 25.5, 40) for i in fi]
-	std::vector<QPointF> points;
-	double fi_min = -M_PI_4;
-	double fi_max = M_PI_4;
-	double fi_step = (fi_max - fi_min) / 100;
-	//        double d = 25.5;
-
-
-	double fi = fi_min;
-	// TODO: Make loop
-	//        for (int i = 0; i < 100; ++i) {
-	QPointF point;
-	point.setX(func_x(fi, data.x0, data.z1)); // TODO: x0 + 2j
-	point.setY(func_y(fi, data.x0, data.z1));
-	points.push_back(point);
-	fi += fi_step;
-	//        }
-
-	auto endTime = std::chrono::steady_clock::now();
-	qDebug() << "\n----------------------------------------";
-	qDebug() << "Calculation TIME:" << std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime).count() << "s"
-			 << std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count() << "mcs";
-
-}
-
 double RefrLogic1::getR() const{
 	return data.R;
 }
@@ -227,7 +194,6 @@ void RefrLogic1::setData(const RefrLogicData &new_data)
 	data.deltaT = new_data.deltaT;
 	data.x0 = new_data.x0;
 	data.z0 = new_data.z0;
-	data.z1 = new_data.z1;
 
 	data.z_settings = new_data.z_settings;
 }

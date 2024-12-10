@@ -123,7 +123,6 @@ RefrLogicData MainWindow::getValuesFromInput()
 	data.a		= ui->lineEdit_2->text().toDouble();
 	data.z0		= ui->lineEdit_3->text().toDouble();
     data.deltaR = ui->lineEdit_4->text().toDouble();
-	data.z1		= ui->lineEdit_5->text().toDouble();
 	data.T0		= ui->lineEdit_6->text().toDouble();
     data.deltaT = ui->lineEdit_7->text().toDouble();
 	data.x0		= ui->lineEdit_8->text().toDouble();
