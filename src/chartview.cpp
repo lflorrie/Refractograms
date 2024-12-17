@@ -5,11 +5,6 @@
 #include <QSplineSeries>
 
 ChartView::ChartView() {
-	// this->setMouseTracking(1);
-	// tooltip = new QGraphicsSimpleTextItem();
-	// // tooltip->setPos(10, 10);
-	// tooltip->setZValue(11); // Устанавливаем z-индекс, чтобы подсказка была поверх графика
-	// tooltip->setVisible(false); // По умолчанию подсказка скрыта
     m_tooltip = 0;
 }
 
@@ -109,29 +104,6 @@ void ChartView::mousePressEvent(QMouseEvent *event)
 
 void ChartView::mouseMoveEvent(QMouseEvent *event)
 {
-
-	// QPointF pos = this->mapToScene(event->pos());
-	// try {
-	// // QValueAxis *axisX = static_cast<QValueAxis *>(this->chart()->axes().at(0));
-	// // QValueAxis *axisY = static_cast<QValueAxis *>(this->chart()->axes(Qt::Vertical).at(0));
-	// 	auto series = this->chart()->series();
-	// 	if (series.isEmpty())
-	// 		return;
-	// 	auto val = this->chart()->mapToValue(pos, series.at(0));
-
-	// 	qDebug() << event->type() <<  " X: " << val.x() << ", Y: " << val.y();
-	// } catch (...)
-	// {
-	// 	return;
-	// }
-
-	// if (!axisX || !axisY)
-	// return;
-	// qreal xVal = chart->mapToValue(pos, axisX);
-	// qreal yVal = chart->mapToValue(pos, axisY);
-	// qreal xVal = pos.x();
-	// qreal yVal = pos.y();
-	// qDebug() << event->type() <<  " X: " << xVal << ", Y: " << yVal;
 	m_coordX->setText(QString("X: %1").arg(chart()->mapToValue(event->pos()).x()));
 	m_coordY->setText(QString("Y: %1").arg(chart()->mapToValue(event->pos()).y()));
 	QChartView::mouseMoveEvent(event);
@@ -140,8 +112,6 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
 bool ChartView::event(QEvent *event)
 {
 	if (event->type() == QEvent::Leave) {
-        // qDebug() << "MOUSE LEAVE";
-		// tooltip->setVisible(0);
 	}
 	return QChartView::event(event);
 }
@@ -190,10 +160,6 @@ void ChartView::onSettingsUpdated(PlotSettings &p)
     axisY->setLabelsVisible(1);
 
     this->settings().setPlotSettings(p);
-//    axisX->setMin(p.grid.minX);
-//    axisX->setMax(p.grid.maxX);
-//    axisY->setMin(p.grid.minY);
-//    axisY->setMax(p.grid.maxY);
 }
 
 

@@ -5,6 +5,9 @@
 
 Scatter3D::Scatter3D()
 {
+    settingsDialogWindow = new SettingsChartView(nullptr, true);
+
+    connect(this->settingsDialogWindow, &SettingsChartView::settingsUpdated, this, &Scatter3D::onSettingsUpdated);
 
 }
 
@@ -51,9 +54,24 @@ void Scatter3D::mousePressEvent(QMouseEvent *event)
 		} else if (selectedAction == save_data) {
             QString fullPath = QFileDialog::getSaveFileName(nullptr, tr("Экспортировать как..."), QString(),"*.txt");
 			exportContent(fullPath);
-		} else if (selectedAction == preferences) {
-			// settingsDialogWindow.open();
+        } else if (selectedAction == preferences) {
+            settingsDialogWindow->open();
 		}
-	}
-	Q3DScatter::mousePressEvent(event);
+    }
+    Q3DScatter::mousePressEvent(event);
+}
+
+void Scatter3D::onSettingsUpdated(PlotSettings &s)
+{
+    auto ax = this->axisX();
+    auto ay = this->axisY();
+    auto az = this->axisZ();
+
+    ax->setRange(s.grid.minX, s.grid.maxX);
+    ay->setRange(s.grid.minY, s.grid.maxY);
+    az->setRange(s.grid.minZ, s.grid.maxZ);
+    ax->setSegmentCount(s.grid.ticksX);
+    ay->setSegmentCount(s.grid.ticksY);
+    az->setSegmentCount(s.grid.ticksZ);
+    m_settings.setPlotSettings(s);
 }

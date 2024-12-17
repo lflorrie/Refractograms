@@ -13,7 +13,7 @@ class SettingsChartView : public QDialog
 	Q_OBJECT
 public:
 	// SettingsChartView();
-	SettingsChartView(QWidget *parent = nullptr);
+    SettingsChartView(QWidget *parent = nullptr, bool enable3d = false);
     void updateSettings(const PlotSettings &s);
 signals:
     void settingsUpdated(PlotSettings &s);
@@ -25,6 +25,7 @@ private slots:
 
 private:
 	Ui::SettingsChartView* ui;
+    bool m_enable3d;
 };
 
 #endif // SETTINGSCHARTVIEW_H

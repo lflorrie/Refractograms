@@ -41,6 +41,7 @@ void RefrCharts::initRefr1() {
 
 	scatter3d->setAspectRatio(1.0); // TODO: make settings ?
 	scatter3d->setHorizontalAspectRatio(1.0);
+
 	// setAxis2D();
 }
 
@@ -48,7 +49,7 @@ void RefrCharts::buildPlots(const RefrLogicData &values, Plots p)
 {
 	if (workerIsRunning)
 	{
-		qInfo() << "Wo3rker is running.";
+        qInfo() << "Worker is running.";
 		return;
 	}
 	workerIsRunning = 1;
@@ -100,13 +101,13 @@ void RefrCharts::setAxis2D() {
         p.grid.ticksY = axisY->tickCount();
         chartViews[i]->settings().setPlotSettings(p);
 	}
+
 }
 // TODO: refactoring this function
 void RefrCharts::onWorkerFinished(Plots type)
 {
 	auto data     = refrWorker->getData();
 	auto refrData = refrWorker->getRefrData().getData();
-	// append data
 	std::vector<QSplineSeries *>splines[4];
 	if (type == PLOT_3_1)
 	{
@@ -179,5 +180,20 @@ void RefrCharts::onWorkerFinished(Plots type)
 	scatter3d->addSeries(data->scatter3d);
 
 	setAxis2D();
+    //set axis 3d
+    auto ax = scatter3d->axisX();
+    auto ay = scatter3d->axisY();
+    auto az = scatter3d->axisZ();
+    PlotSettings s;
+    s.grid.minX = ax->min();
+    s.grid.maxX = ax->max();
+    s.grid.minY = ay->min();
+    s.grid.maxY = ay->max();
+    s.grid.minZ = az->min();
+    s.grid.maxZ = az->max();
+    s.grid.ticksX = ax->segmentCount();
+    s.grid.ticksY = ay->segmentCount();
+    s.grid.ticksZ = az->segmentCount();
+    scatter3d->updateSettingsUi(s);
 	workerIsRunning = false;
 }
