@@ -3,12 +3,25 @@
 #include <vector>
 #include <string>
 
-class PlotSettings
+struct PlotSettings
 {
-/*
+    /* Настройка сетки */
+    struct GridSettings
+    {
+        GridSettings() : minX(0), maxX(0), minY(0), maxY(0), ticksX(0), ticksY(0), minZ(0), maxZ(0), ticksZ(0) {}
 
-	Настройка сетки
-*/
+        double minX;
+        double maxX;
+        double minY;
+        double maxY;
+
+        double ticksX;
+        double ticksY;
+
+        double minZ;
+        double maxZ;
+        double ticksZ;
+    } grid;
 };
 
 class Settings
@@ -16,18 +29,11 @@ class Settings
 public:
 	Settings();
 
-	struct Tab {
-		std::vector<double> fields;
-		std::vector<PlotSettings> plotSettings;
-	};
+    void setPlotSettings(const PlotSettings &s);
 
-	void Save(std::string &path);
-	void Load(std::string &path);
-	void f() {
-		settingsTabs[0].fields;
-	}
+    PlotSettings getPlotSettings() const;
 private:
-	std::vector<Tab> settingsTabs;
+    PlotSettings plotSettings;
 };
 
 #endif // SETTINGS_H

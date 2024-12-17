@@ -5,6 +5,9 @@
 
 Scatter3D::Scatter3D()
 {
+    settingsDialogWindow = new SettingsChartView(nullptr, true);
+
+    connect(this->settingsDialogWindow, &SettingsChartView::settingsUpdated, this, &Scatter3D::onSettingsUpdated);
 
 }
 
@@ -38,22 +41,37 @@ void Scatter3D::mousePressEvent(QMouseEvent *event)
 {
 	qDebug() << "Scatter3D: MousePressEvent";
 	if (event->button() == Qt::MiddleButton) {
-		QMenu menu;
-		QAction* save = menu.addAction("Save");
-		QAction* save_data = menu.addAction("Save data");
-		QAction* preferences = menu.addAction("Preferences");
+        QMenu menu;
+        QAction* save = menu.addAction(tr("Сохранить изображение"));
+        QAction* save_data = menu.addAction(tr("Экспортировать данные"));
+        QAction* preferences = menu.addAction(tr("Настройки"));
 
 		QAction* selectedAction = menu.exec(event->globalPos());
 		// TODO: QScatter3D is not a widget, but getSaveFileName need widget parent
 		if (selectedAction == save) {
-			QString fullPath = QFileDialog::getSaveFileName(nullptr, tr("Save as..."), QString(),"*.png");
+            QString fullPath = QFileDialog::getSaveFileName(nullptr, tr("Сохранить как..."), QString(),"*.png");
 			saveContent(fullPath);
 		} else if (selectedAction == save_data) {
-			QString fullPath = QFileDialog::getSaveFileName(nullptr, tr("Export as..."), QString(),"*.txt");
+            QString fullPath = QFileDialog::getSaveFileName(nullptr, tr("Экспортировать как..."), QString(),"*.txt");
 			exportContent(fullPath);
-		} else if (selectedAction == preferences) {
-			// settingsDialogWindow.open();
+        } else if (selectedAction == preferences) {
+            settingsDialogWindow->open();
 		}
-	}
-	Q3DScatter::mousePressEvent(event);
+    }
+    Q3DScatter::mousePressEvent(event);
+}
+
+void Scatter3D::onSettingsUpdated(PlotSettings &s)
+{
+    auto ax = this->axisX();
+    auto ay = this->axisY();
+    auto az = this->axisZ();
+
+    ax->setRange(s.grid.minX, s.grid.maxX);
+    ay->setRange(s.grid.minY, s.grid.maxY);
+    az->setRange(s.grid.minZ, s.grid.maxZ);
+    ax->setSegmentCount(s.grid.ticksX);
+    ay->setSegmentCount(s.grid.ticksY);
+    az->setSegmentCount(s.grid.ticksZ);
+    m_settings.setPlotSettings(s);
 }

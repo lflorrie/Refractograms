@@ -34,11 +34,9 @@ private slots:
 private:
 	RefrLogicData getValuesFromInput();
 private:
-
 	QProgressBar *progressBar;
 	QPropertyAnimation *animationProgressBar;
 	QGraphicsOpacityEffect *opacityEffect;
-
 	RefrCharts*		m_charts;
 	QFont			m_font;
 	Ui::MainWindow* ui;

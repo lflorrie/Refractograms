@@ -8,24 +8,33 @@
 
 struct RefrLogicData
 {
-	/* радиус шара */
+    /* Радиус шара */
 	double R;
-	/* характерная толщина слоя */
+    /* Толщина пограничного слоя */
 	double a;
-	/* координата входа лазерного пучка в неоднородность */
+    /* Расстояние от центра шара до правого края плоскости по оси Z */
 	double z0;
-    double deltaR;
-    double z1;
-    double T0;
-    double deltaT;
+    /* Расстояние от центра шара до правого края плоскости по оси X */
     double x0;
+    /* Сдвиг */
+    double deltaR;
+    /* Начальная температура шара */
+    double T0;
+    /* Изменение температуры шара */
+    double deltaT;
 
 	// Additional params
-	struct SettingsForZ{
-		int    count;
-		int    count_of_points;
-		double start;
+    struct SettingsForZ
+    {
+        /* Количество поперечных сечений */
+        int    count;
+        /* Количество точек */
+        int    count_of_points;
+        /* Координата перого сечения по оси Z */
+        double start;
+        /* Шаг между сечениями */
 		double step;
+        /* Положение экрана z1 */
 		double current;
 	} z_settings;
 };
@@ -47,14 +56,12 @@ public:
 
 	double func_rn(double fi, double d);
 
-    //
-
 	double func_r0(double fi, double d);
 	double func_alpha0(double fi, double d);
 
 	double func_integr(double r, double fi, double d);
 
-	double func_integr_new(double r);
+    [[deprecated]] double func_integr_new(double r);
 
 	double func_alphan(double fi, double d);
 
@@ -75,7 +82,6 @@ public:
 
 	std::vector<QPointF> make2DPlot(std::function<double(double)> func, double from, double to, int steps);
 
-	void calculate();
 	double getR() const;
 	RefrLogicData getData() const;
 	void setData(const RefrLogicData &new_data);

@@ -33,6 +33,7 @@ public:
 
 	QWidget			*container;
 	Scatter3D		*scatter3d;
+
 	QChart			*charts[TAB_MAX];
 	ChartView		*chartViews[TAB_MAX];
 	std::vector<QLayout *> m_layouts;
